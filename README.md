@@ -57,6 +57,9 @@ Because of the way in which these endpoints are recognized, more endpoints may e
 > For this example to work, please copy file `FileTypeMappings.json` and folder `public` into the working directory of your Node-RED instance
 
 ![](examples/custom-web-server.png)
+
+The following part is already known from the previous example:
+
 ![](examples/serving-files.png)
 
 ### Closed Web Server ###
