@@ -70,6 +70,7 @@ Often, web servers are not completely open for everybody - some (or all) entry p
 
 Protecting entry points usually requires some kind of authorization management. In this example, Node-RED developers (like you) are allowed to create new users (yet without any password), reset user passwords and delete users offline. The users themselves may set their passwords or delete themselves online without prior authorization as long as no password is set - it is assumed that they are in contact with the Node-RED developer who created them or cleared their password. For all other operations users have to "login" first (presenting their user name and their current password). They may then change their password, delete themselves - and navigate to the other endpoints this serve offers.
 
+Authorization itself is handled using "Cookies": upon "login" a "Token" is created which allows the logged-in user to access non-public endpoints for a certain period (e.g., 10 minutes) until he/she has to log-in again.
 
 
 
