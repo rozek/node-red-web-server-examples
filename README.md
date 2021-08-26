@@ -20,16 +20,16 @@ To test the examples, a [Postman collection](examples/PostmanCollection.json) is
 
 Alternatively, other tools like [cURL](https://curl.se/) may be used as well.
 
-### Simple Web Server ###
+### Simple (and open) Web Server ###
 
 ![](examples/simple-web-server.png)
 
-### Custom Web Server ###
+### Custom (and still open) Web Server ###
 
 ![](examples/custom-web-server.png)
 ![](examples/serving-files.png)
 
-### Secured Web Server ###
+### Closed Web Server ###
 
-![](examples/secured-web-server-I.png)
-![](examples/secured-web-server-II.png)
+![](examples/closed-web-server-I.png)
+![](examples/closed-web-server-II.png)
