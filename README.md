@@ -36,6 +36,8 @@ The server recognizes many different file types by looking at their type suffixe
 
 Unforeseen errors are caught by a generic "catch" node and result in a response with status code 500 ("Internal Server Error")
 
+Node-RED's debug console serves as a kind of "logger" and informs about any served files or occurred errors.
+
 ![](examples/simple-web-server.png)
 
 Simply import the [example from this repo](examples/simple-web-server.json) into your Node-RED workspace and deploy. You may then test your server either by navigating your browser to `{{BaseURL}}/simple-web-server` or using the included Postman collection. Currently, the `public` folder contains two files only, but you are free to add as many files as you like.
