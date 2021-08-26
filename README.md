@@ -36,7 +36,7 @@ The server recognizes many different file types by looking at their type suffixe
 
 Unforeseen errors are caught by a generic "catch" node and result in a response with status code 500 ("Internal Server Error")
 
-Node-RED's debug console serves as a kind of "logger" and informs about any served files or occurred errors.
+Node-RED's debug console serves as a kind of "logger" and informs about any served files or any errors that occur.
 
 ![](examples/simple-web-server.png)
 
