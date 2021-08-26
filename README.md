@@ -22,6 +22,18 @@ Alternatively, other tools like [cURL](https://curl.se/) may be used as well.
 
 ### Simple (and open) Web Server ###
 
+The first example in this series is a simple web server delivering files found in a configured directory.
+
+> For this example to work, please copy file `FileTypeMappings.json` and folder `public` into the working directory of your Node-RED instance
+
+A simple path normalization asserts that clients may only request files from within the configured directory and may not inspect the whole file system.
+
+When the requested path is that of a directory, the requesting client is redirected to a file "index.html" in that directory. If no file exists at the requested path, a response with the status code 404 (Not Found) is sent back.
+
+The server recognizes many different file types by looking at their type suffixes and sets the "Content-Type" header accordingly (see file [FileTypeMappings.json](https://raw.githubusercontent.com/rozek/node-red-web-server-examples/main/FileTypeMappings.json) for the complete set) 
+
+Unforeseen errors are caught by a generic "catch" node and result in a response with status code 500 ("Internal Server Error")
+
 ![](examples/simple-web-server.png)
 
 ### Custom (and still open) Web Server ###
