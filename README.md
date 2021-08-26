@@ -33,3 +33,7 @@ Alternatively, other tools like [cURL](https://curl.se/) may be used as well.
 
 ![](examples/closed-web-server-I.png)
 ![](examples/closed-web-server-II.png)
+
+## License ##
+
+[MIT License](LICENSE.md)
