@@ -1,0 +1,705 @@
+[
+    {
+        "id": "691d93beb6cedffd",
+        "type": "http in",
+        "z": "5879663705de9d62",
+        "name": "",
+        "url": "simple-web-server/:FilePath(*)",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 160,
+        "y": 220,
+        "wires": [
+            [
+                "711c6ace3ab09aa1"
+            ]
+        ]
+    },
+    {
+        "id": "b052136a3ca2213b",
+        "type": "comment",
+        "z": "5879663705de9d62",
+        "name": "simple file-based Web Server",
+        "info": "",
+        "x": 140,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "1bceeca0f84abf1f",
+        "type": "file in",
+        "z": "5879663705de9d62",
+        "name": "./public/<FilePath>",
+        "filename": "",
+        "format": "",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 370,
+        "y": 280,
+        "wires": [
+            [
+                "afb739f45f8eee53"
+            ]
+        ]
+    },
+    {
+        "id": "226d55fd32f3af9c",
+        "type": "http response",
+        "z": "5879663705de9d62",
+        "name": "",
+        "statusCode": "200",
+        "headers": {},
+        "x": 520,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "dfa1f0e7d32ab7c5",
+        "type": "http in",
+        "z": "5879663705de9d62",
+        "name": "",
+        "url": "simple-web-server",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 130,
+        "y": 160,
+        "wires": [
+            [
+                "c708bb0d3e8dc0a0"
+            ]
+        ]
+    },
+    {
+        "id": "535f141e299228e1",
+        "type": "catch",
+        "z": "5879663705de9d62",
+        "name": "",
+        "scope": [
+            "c0eeb3b1028eea31"
+        ],
+        "uncaught": false,
+        "x": 110,
+        "y": 320,
+        "wires": [
+            [
+                "6a73aa6648d1b1be"
+            ]
+        ]
+    },
+    {
+        "id": "ac7c7a98e2cb33c3",
+        "type": "change",
+        "z": "5879663705de9d62",
+        "name": "Bad Request",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Bad Request",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "statusCode",
+                "pt": "msg",
+                "to": "400",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 370,
+        "y": 420,
+        "wires": [
+            [
+                "3f2c54661e83a267"
+            ]
+        ]
+    },
+    {
+        "id": "3f2c54661e83a267",
+        "type": "http response",
+        "z": "5879663705de9d62",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 530,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "6a73aa6648d1b1be",
+        "type": "switch",
+        "z": "5879663705de9d62",
+        "name": "",
+        "property": "error.message",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "regex",
+                "v": "^Error:.ENOENT",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "regex",
+                "v": "^Error:.EISDIR",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 150,
+        "y": 400,
+        "wires": [
+            [
+                "64958955eb3c13b5"
+            ],
+            [
+                "2d30125a5162dd4f"
+            ],
+            [
+                "ac7c7a98e2cb33c3"
+            ]
+        ]
+    },
+    {
+        "id": "64958955eb3c13b5",
+        "type": "change",
+        "z": "5879663705de9d62",
+        "name": "404",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Not Found",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "statusCode",
+                "pt": "msg",
+                "to": "404",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 350,
+        "y": 380,
+        "wires": [
+            [
+                "3f2c54661e83a267",
+                "8011022b521dd15c"
+            ]
+        ]
+    },
+    {
+        "id": "c0eeb3b1028eea31",
+        "type": "function",
+        "z": "5879663705de9d62",
+        "name": "normalize filename",
+        "func": "let FilePath = msg.filename.trim()\n  .replace(/^\\/+/,'')     // remove any leading \"/\"\n  .replace(/\\/+$/,'')     // remove trailing \"/\"s\n  .replace(/\\/\\/+/g,'/')  // reduce multiple \"/\"\n\n  let PathList = FilePath.split('/'), Result = []\n  Loop: for (let i = 0, l = PathList.length; i < l; i++) {\n    let PathItem = PathList[i].trim()\n    switch (PathItem) {\n      case '.':  break\n      case '..': if (Result.length === 0) {\n                   break Loop\n                 } else {\n                   Result.pop()\n                 }\n                 break\n      default:   Result.push(PathItem)\n    }\n  }\n  if (Result.length === 0) {\n    throw new Error('ENOENT')\n  }\nmsg.filename = './public/' + Result.join('/')\n\nreturn msg\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 150,
+        "y": 280,
+        "wires": [
+            [
+                "1bceeca0f84abf1f"
+            ]
+        ]
+    },
+    {
+        "id": "c708bb0d3e8dc0a0",
+        "type": "change",
+        "z": "5879663705de9d62",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "filename",
+                "pt": "msg",
+                "to": "/",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 430,
+        "y": 160,
+        "wires": [
+            [
+                "c0eeb3b1028eea31"
+            ]
+        ]
+    },
+    {
+        "id": "711c6ace3ab09aa1",
+        "type": "change",
+        "z": "5879663705de9d62",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "filename",
+                "pt": "msg",
+                "to": "req.params.FilePath",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 430,
+        "y": 220,
+        "wires": [
+            [
+                "c0eeb3b1028eea31"
+            ]
+        ]
+    },
+    {
+        "id": "fcb781c490d57842",
+        "type": "file in",
+        "z": "5879663705de9d62",
+        "name": "./public/<FilePath>",
+        "filename": "",
+        "format": "",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 390,
+        "y": 480,
+        "wires": [
+            [
+                "47e5159c1df3abe7"
+            ]
+        ]
+    },
+    {
+        "id": "f254933c365bbf24",
+        "type": "catch",
+        "z": "5879663705de9d62",
+        "name": "",
+        "scope": [
+            "fcb781c490d57842"
+        ],
+        "uncaught": false,
+        "x": 150,
+        "y": 520,
+        "wires": [
+            [
+                "5b878979d4b88b4a"
+            ]
+        ]
+    },
+    {
+        "id": "5b878979d4b88b4a",
+        "type": "switch",
+        "z": "5879663705de9d62",
+        "name": "",
+        "property": "error.message",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "regex",
+                "v": "^Error:.ENOENT",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 290,
+        "y": 520,
+        "wires": [
+            [
+                "64958955eb3c13b5"
+            ],
+            [
+                "ac7c7a98e2cb33c3"
+            ]
+        ]
+    },
+    {
+        "id": "47a9e343cdcdc426",
+        "type": "catch",
+        "z": "5879663705de9d62",
+        "name": "",
+        "scope": [
+            "1bceeca0f84abf1f"
+        ],
+        "uncaught": false,
+        "x": 330,
+        "y": 320,
+        "wires": [
+            [
+                "6a73aa6648d1b1be"
+            ]
+        ]
+    },
+    {
+        "id": "afb739f45f8eee53",
+        "type": "function",
+        "z": "5879663705de9d62",
+        "name": "set Content-Type",
+        "func": "let FileTypeMappings = flow.get('FileTypeMappings') || {}\n\nlet FileSuffix  = (/[.][^.]+$/.exec(msg.filename) || [])[0] || ''\nlet ContentType = FileTypeMappings[FileSuffix] || 'application/octet-stream'\n\nmsg.headers = msg.headers || {}\n  msg.headers['Content-Type'] = ContentType\nreturn msg\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 580,
+        "wires": [
+            [
+                "226d55fd32f3af9c",
+                "6f96eed3060b50f2"
+            ]
+        ]
+    },
+    {
+        "id": "21e306681437a23b",
+        "type": "inject",
+        "z": "5879663705de9d62",
+        "name": "at Startup",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 840,
+        "wires": [
+            [
+                "b07ef6ad97f0a65e"
+            ]
+        ]
+    },
+    {
+        "id": "b07ef6ad97f0a65e",
+        "type": "file in",
+        "z": "5879663705de9d62",
+        "name": "",
+        "filename": "./FileTypeMappings.json",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "utf8",
+        "allProps": false,
+        "x": 310,
+        "y": 840,
+        "wires": [
+            [
+                "453c578f9d9cbe02"
+            ]
+        ]
+    },
+    {
+        "id": "453c578f9d9cbe02",
+        "type": "json",
+        "z": "5879663705de9d62",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 130,
+        "y": 900,
+        "wires": [
+            [
+                "1f4034c977ccb7e3"
+            ]
+        ]
+    },
+    {
+        "id": "1f4034c977ccb7e3",
+        "type": "change",
+        "z": "5879663705de9d62",
+        "name": "save in flow context",
+        "rules": [
+            {
+                "t": "set",
+                "p": "FileTypeMappings",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 320,
+        "y": 900,
+        "wires": [
+            [
+                "b329e94926cdea56"
+            ]
+        ]
+    },
+    {
+        "id": "ed18713439b1ad3e",
+        "type": "catch",
+        "z": "5879663705de9d62",
+        "name": "",
+        "scope": [
+            "b07ef6ad97f0a65e",
+            "453c578f9d9cbe02"
+        ],
+        "uncaught": false,
+        "x": 130,
+        "y": 940,
+        "wires": [
+            [
+                "14279c2e2e0b0e0f"
+            ]
+        ]
+    },
+    {
+        "id": "14279c2e2e0b0e0f",
+        "type": "debug",
+        "z": "5879663705de9d62",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "'could not load mappings'",
+        "statusType": "jsonata",
+        "x": 270,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "a0c67d16aaf97d3b",
+        "type": "comment",
+        "z": "5879663705de9d62",
+        "name": "FileTypeMappings.json maps File Suffixes to MIME-Types",
+        "info": "",
+        "x": 230,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "aa49176d10883cd5",
+        "type": "catch",
+        "z": "5879663705de9d62",
+        "name": "",
+        "scope": null,
+        "uncaught": true,
+        "x": 100,
+        "y": 680,
+        "wires": [
+            [
+                "306ca59d9deb4844",
+                "8088a57dd75b2c2b"
+            ]
+        ]
+    },
+    {
+        "id": "306ca59d9deb4844",
+        "type": "change",
+        "z": "5879663705de9d62",
+        "name": "internal Error",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Internal Server Error",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "statusCode",
+                "pt": "msg",
+                "to": "500",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 290,
+        "y": 680,
+        "wires": [
+            [
+                "f9904402c76b32d1"
+            ]
+        ]
+    },
+    {
+        "id": "f9904402c76b32d1",
+        "type": "http response",
+        "z": "5879663705de9d62",
+        "name": "",
+        "statusCode": "500",
+        "headers": {},
+        "x": 520,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "8088a57dd75b2c2b",
+        "type": "debug",
+        "z": "5879663705de9d62",
+        "name": "show error on console",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 320,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "8011022b521dd15c",
+        "type": "debug",
+        "z": "5879663705de9d62",
+        "name": "report",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "'file not found: ' & msg.filename",
+        "targetType": "jsonata",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 510,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "b329e94926cdea56",
+        "type": "debug",
+        "z": "5879663705de9d62",
+        "name": "Status",
+        "active": true,
+        "tosidebar": false,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "'mappings loaded'",
+        "statusType": "jsonata",
+        "x": 510,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "47e5159c1df3abe7",
+        "type": "function",
+        "z": "5879663705de9d62",
+        "name": "set Location",
+        "func": "let completeURL = msg.req.url\nlet URLPrefix   = /^\\/[^\\/]+/.exec(completeURL)[0]\n\nmsg.headers = msg.headers || {}\n  let Location = msg.filename.replace('./public',URLPrefix)\n  msg.headers['Location'] = Location\nreturn msg\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 620,
+        "wires": [
+            [
+                "0cc2db76e7d44075"
+            ]
+        ]
+    },
+    {
+        "id": "0cc2db76e7d44075",
+        "type": "http response",
+        "z": "5879663705de9d62",
+        "name": "",
+        "statusCode": "301",
+        "headers": {},
+        "x": 520,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "2d30125a5162dd4f",
+        "type": "function",
+        "z": "5879663705de9d62",
+        "name": "add /index.html",
+        "func": "msg.filename = msg.filename + (\n  msg.filename.endsWith('/') ? '' : '/'\n) + 'index.html'\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 180,
+        "y": 480,
+        "wires": [
+            [
+                "fcb781c490d57842"
+            ]
+        ]
+    },
+    {
+        "id": "6f96eed3060b50f2",
+        "type": "debug",
+        "z": "5879663705de9d62",
+        "name": "report",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "'serving: ' & msg.filename",
+        "targetType": "jsonata",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 510,
+        "y": 540,
+        "wires": []
+    }
+]
