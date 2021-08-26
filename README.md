@@ -66,8 +66,17 @@ To test this server, just import the ["custom web server" example](examples/cust
 
 ### Closed Web Server ###
 
+Often, web servers are not completely open for everybody - some (or all) entry points are protected instead and require clients to authenticate themselves before being authorized to access these URLs.
+
+Protecting entry points usually requires some kind of authorization management. In this example, Node-RED developers (like you) are allowed to create new users (yet without any password), reset user passwords and delete users offline. The users themselves may set their passwords or delete themselves online without prior authorization as long as no password is set - it is assumed that they are in contact with the Node-RED developer who created them or cleared their password. For all other operations users have to "login" first (presenting their user name and their current password). They may then change their password, delete themselves - and navigate to the other endpoints this serve offers.
+
+
+
+
 ![](examples/closed-web-server-I.png)
 ![](examples/closed-web-server-II.png)
+
+In this example, all endpoints (except those needed for authorization management) demand a successful authorization before being processed. In practice, there is often a mixture of public and private endpoints - a situation which may easily be implemented by combining flows from this example and the previous one.
 
 ## License ##
 
