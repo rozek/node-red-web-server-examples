@@ -48,7 +48,7 @@ Simply import the [example from this repo](examples/simple-web-server.json) into
 
 As mentioned before, Node-RED becomes interesting as soon as servers with custom endpoints will be needed. The following example demonstrates such a scenario: in addition to the part mentioned before which simply serves static files, three new endpoints are introduced that *compute* responses rather than load them from a file system:
 
-* `{{BaseURL}}/custom-web-server/server-time` simply sends the current server time back
+* `{{BaseURL}}/custom-web-server/server-time` simply sends the current server time in ISO format
 * `{{BaseURL}}/custom-web-server/echo` responds with a JSON object containing important parts of the `msg.req` object
 * `{{BaseURL}}/custom-web-server/client-address` determines the IP address of the connected client and returns it
 
@@ -61,6 +61,8 @@ Because of the way in which these endpoints are recognized, more endpoints may e
 The following part is already known from the previous example:
 
 ![](examples/serving-files.png)
+
+To test this server, just import the ["custom web server" example](examples/custom-web-server.json) into your Node-RED workspace and deploy. It works similar to the "simple Web Server" presented before - with the exception, that requests to `{{BaseURL}}/custom-web-server/server-time`, `{{BaseURL}}/custom-web-server/echo` or `{{BaseURL}}/custom-web-server/client-address` will now be processed internally even if files with these names exist in the `` directory. The included Postman collection may help you testing.
 
 ### Closed Web Server ###
 
