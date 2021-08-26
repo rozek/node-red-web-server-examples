@@ -46,6 +46,8 @@ Simply import the [example from this repo](examples/simple-web-server.json) into
 
 ### Custom (and still open) Web Server ###
 
+As mentioned before, Node-RED becomes interesting as soon as servers with custom endpoints will be needed. The following example demonstrates such a scenario: in addition to the part mentioned before which simply serves static files, three new endpoints are introduced that *compute* responses rather than load them from a file system.
+
 ![](examples/custom-web-server.png)
 ![](examples/serving-files.png)
 
