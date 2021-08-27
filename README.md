@@ -80,7 +80,7 @@ In order to make this behaviour more comfortable for the user, any successfully 
 
 User data is kept in a JSON file called `Users.json` within the working directory of the running Node-RED instance. It will be read upon start-up and written whenever any user-related setting changes. The file contains a "dictionary" of user names with password hashes as values. These hashes are computed using PBKDF2 with random salt - this avoids having to store passwords in plain text form and makes automated dictionary attacks more difficult.
 
-User names are arbitrary - this server does not make any assumptions about their format. Their length should however be limited since cookies are not allowed to occupy more than 4093 characters (including their name and some other cookie details) - assuming a length limit of 2048 bytes seems like a good idea.
+User names are arbitrary - this server does not make any assumptions about their format (except that they must not contain neither colons (":") nor control characters). Their length should however be limited since cookies are not allowed to occupy more than 4093 characters (including their name and some other cookie details) - assuming a length limit of 2048 bytes seems like a good idea.
 
 ![](examples/closed-web-server-I.png)
 ![](examples/closed-web-server-II.png)
