@@ -46,10 +46,10 @@ Simply import the [example from this repo](examples/simple-web-server.json) into
 
 ### Custom (and still open) Web Server ###
 
-As mentioned before, Node-RED becomes interesting as soon as servers with custom endpoints will be needed. The following example demonstrates such a scenario: in addition to the part mentioned before which simply serves static files, three new endpoints are introduced that *compute* responses rather than load them from a file system:
+As mentioned before, Node-RED becomes interesting as soon as servers with custom endpoints will be needed. The following example demonstrates such a scenario: in addition to the part mentioned before which serves static files only, three new endpoints are introduced that *compute* responses rather than load them from a file system:
 
-* `{{BaseURL}}/custom-web-server/server-time` simply sends the current server time in ISO format
-* `{{BaseURL}}/custom-web-server/echo` responds with a JSON object containing important parts of the `msg.req` object
+* `{{BaseURL}}/custom-web-server/server-time` simply sends the current server time in ISO format,
+* `{{BaseURL}}/custom-web-server/echo` responds with a JSON object containing important parts of the `msg.req` object for the received request,
 * `{{BaseURL}}/custom-web-server/client-address` determines the IP address of the connected client and returns it
 
 Because of the way in which these endpoints are recognized, more endpoints may easily be added (or unwanted ones removed). Static file serving is still included and starts if no custom endpoint was found - the flow needed is the same as in the previous example, which is why it has been connected using a "link" node: in this way, several implementations may use the same sequence of nodes without having to copy them.
