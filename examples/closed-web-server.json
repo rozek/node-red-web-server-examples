@@ -590,7 +590,7 @@
         "props": [
             {
                 "p": "user-id",
-                "v": "rozek",
+                "v": "",
                 "vt": "str"
             }
         ],
@@ -599,7 +599,6 @@
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
-        "payloadType": "str",
         "x": 760,
         "y": 520,
         "wires": [
@@ -917,7 +916,7 @@
         "props": [
             {
                 "p": "UserId",
-                "v": "rozek",
+                "v": "",
                 "vt": "str"
             }
         ],
