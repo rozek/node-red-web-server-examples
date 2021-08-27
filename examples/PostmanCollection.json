@@ -1,0 +1,398 @@
+{
+	"info": {
+		"_postman_id": "66ece92e-dd94-4118-87d6-c8c924402b8a",
+		"name": "node-red-web-server-examples",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "simple Web Server",
+			"item": [
+				{
+					"name": "get root file",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/simple-web-server",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"simple-web-server"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get file outside served folder",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/simple-web-server/../package.json",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"simple-web-server",
+								"..",
+								"package.json"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get inner file",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/simple-web-server/img/Mandelbrot_240x240.png",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"simple-web-server",
+								"img",
+								"Mandelbrot_240x240.png"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "custom Web Server",
+			"item": [
+				{
+					"name": "get root file",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/custom-web-server",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"custom-web-server"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get file outside served folder",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/custom-web-server/../package.json",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"custom-web-server",
+								"..",
+								"package.json"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get inner file",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/custom-web-server/img/Mandelbrot_240x240.png",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"custom-web-server",
+								"img",
+								"Mandelbrot_240x240.png"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get server-time",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/custom-web-server/server-time",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"custom-web-server",
+								"server-time"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "echo request details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/custom-web-server/echo/with/additional/path?a=1&a=2&b=%20&c=Test&d",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"custom-web-server",
+								"echo",
+								"with",
+								"additional",
+								"path"
+							],
+							"query": [
+								{
+									"key": "a",
+									"value": "1"
+								},
+								{
+									"key": "a",
+									"value": "2"
+								},
+								{
+									"key": "b",
+									"value": "%20"
+								},
+								{
+									"key": "c",
+									"value": "Test"
+								},
+								{
+									"key": "d",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "show client IP address",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/custom-web-server/client-address",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"custom-web-server",
+								"client-address"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "closed Web Server",
+			"item": [
+				{
+					"name": "get root file",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/closed-web-server",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"closed-web-server"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get file outside served folder",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/closed-web-server/../package.json",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"closed-web-server",
+								"..",
+								"package.json"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get inner file",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/closed-web-server/img/Mandelbrot_240x240.png",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"closed-web-server",
+								"img",
+								"Mandelbrot_240x240.png"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "set password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userid\":\"{{Username}}\",\n  \"password\":\"{{Password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BaseURL}}/closed-web-server/set-password",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"closed-web-server",
+								"set-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userid\":\"{{Username}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BaseURL}}/closed-web-server/delete-user",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"closed-web-server",
+								"delete-user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userid\":\"{{Username}}\",\n  \"password\":\"{{Password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BaseURL}}/closed-web-server/login",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"closed-web-server",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "{{Password}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{Username}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BaseURL",
+			"value": "127.0.0.1:1880"
+		},
+		{
+			"key": "Username",
+			"value": ""
+		},
+		{
+			"key": "Password",
+			"value": ""
+		}
+	]
+}
