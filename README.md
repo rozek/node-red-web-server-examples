@@ -66,20 +66,32 @@ To test this server, just import the ["custom web server" example](examples/cust
 
 ### Closed Web Server ###
 
-Often, web servers are not completely open for everybody - instead, some (or all) entry points are protected and require clients to authenticate themselves before being authorized to access these URLs.
+Often, web servers are not completely open for everybody - instead, some (or all) entry points are protected and require clients to authenticate themselves before being authorized to access these resources.
 
-Protecting entry points usually requires some kind of authorization management. In the following example, Node-RED developers (like you) have to explicitly create new users themselves (without specifying any password for them), and may reset user passwords or delete users - all this is done within the Node-RED server workspace. Users created this way are allowed to define their passwords or delete themselves through HTTP endpoints without prior authorization as long as no password is set - it is assumed that they are in contact with a Node-RED developer who informs them about the appropriate time. For all other operations users have to "login" first (presenting their user name and current password). They may then change their password, delete themselves - and navigate to the other endpoints this server offers.
+Protecting entry points usually implies some kind of authorization management. In the following example, Node-RED developers (like you) first have to explicitly create new users themselves (without specifying any initial password for them), and may later also reset user passwords or delete users - all this is done within the Node-RED server workspace. Without prior authorization, users created this way are only allowed to define their passwords or delete themselves as long as no password is set - this is done through HTTP endpoints (where it is assumed that these users are in contact with a Node-RED developer who informs them about the appropriate time). For all other operations users have to "login" first (presenting their user name and current password). They may then change their password, delete themselves - and navigate to the other endpoints this server offers.
 
 This kind of "developer-managed authorization handling" gives developers full control over the users they permit, but still keeps user passwords secret from them. On the other hand, users have full control over their passwords and may also delete their accounts - but no user is allowed to register him/herself. 
 
-Authorization itself is handled using "Cookies": upon "login" a "Token" is created which allows the logged-in user to access non-public endpoints for a certain period (e.g., 10 minutes) until he/she has to log-in again.
+Authorization itself is handled using "Cookies": upon "login" a "Token" is created which allows the logged-in user to access non-public endpoints for a certain period until he/she has to log-in again.
 
+The token itself consists of the requesting user's name and an expiration time (in this example, tokens remain valid for 2 minutes). While being sent in readable form, these details are protected using a "message digest" which is also part of the token cookie. As a consequence, any attempt to modify the cookie will immediately invalidate the token. The "secret" this message digest is based on is randomly generated upon Node-RED startup: any redeployment will therefore automatically invalidate any existing tokens.
 
+In order to make this behaviour more comfortable for the user, any successfully authorized operation also "refreshes" the access token. Thus, a new login will only be required after two minutes of inactivity.
+
+User data is kept in a JSON file called `Users.json` within the working directory of the running Node-RED instance. It will be read upon start-up and written whenever anything changes. The file contains a "dictionary" of user names with password hashes as values. These hashes are computed using PBKDF2 with random salts - this avoids having to store passwords in plain text form and makes automated dictionary attacks more difficult.
+
+User names are arbitrary - this server does not make any assumptions about their format. Their length should however be limited since cookies are not allowed to occupy more than 4093 characters (including their name and some other cookie details) - assuming a length limit of 2048 bytes seems like a good idea.
 
 ![](examples/closed-web-server-I.png)
 ![](examples/closed-web-server-II.png)
 
-In this example, all endpoints (except those needed for authorization management) demand a successful authorization before being processed. In practice, there is often a mixture of public and private endpoints - a situation which may easily be implemented by combining flows from this example and the previous one.
+The following part is already known from the previous examples:
+
+![](examples/serving-files.png)
+
+To test this server, just import the ["closed web server" example](examples/closed-web-server.json) into your Node-RED workspace and deploy. The included Postman collection contains several requests which allow you act like a user, any "administrative" operations have to be performed using Node-RED itself.
+
+In this example, *all* endpoints (except those needed for authorization management) demand a successful authorization before being processed. In practice, there is often a mixture of public and private endpoints - a situation which may easily be implemented by combining flows from this example and the previous one.
 
 ## License ##
 
