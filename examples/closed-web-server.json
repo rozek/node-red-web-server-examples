@@ -1,0 +1,1993 @@
+[
+    {
+        "id": "baeb1d0f58bd235b",
+        "type": "comment",
+        "z": "80deaf3fb9cfc52d",
+        "name": "closed Web Server",
+        "info": "",
+        "x": 110,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "4ae46027c10e9ce3",
+        "type": "comment",
+        "z": "80deaf3fb9cfc52d",
+        "name": "closed file-based Web Server (with Cookie-based Authorization)",
+        "info": "",
+        "x": 250,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "56f2b41a59a6eaaf",
+        "type": "http in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "url": "closed-web-server",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 130,
+        "y": 160,
+        "wires": [
+            [
+                "3a6e6a0bd1908dc7"
+            ]
+        ]
+    },
+    {
+        "id": "e3c5371b6a2d2587",
+        "type": "http in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "url": "closed-web-server/:Path(*)",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 220,
+        "wires": [
+            [
+                "4656484799d4e4ab"
+            ]
+        ]
+    },
+    {
+        "id": "3a6e6a0bd1908dc7",
+        "type": "change",
+        "z": "80deaf3fb9cfc52d",
+        "name": "set Path",
+        "rules": [
+            {
+                "t": "set",
+                "p": "req.params.Path",
+                "pt": "msg",
+                "to": "/",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 400,
+        "y": 160,
+        "wires": [
+            [
+                "4656484799d4e4ab"
+            ]
+        ]
+    },
+    {
+        "id": "9dd4030d85f45096",
+        "type": "http response",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "statusCode": "401",
+        "headers": {},
+        "x": 520,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "2ff56d89dd751cfc",
+        "type": "comment",
+        "z": "80deaf3fb9cfc52d",
+        "name": "online Methods for Authorization Management",
+        "info": "",
+        "x": 190,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "f35ffd8c2a941abe",
+        "type": "http in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "url": "closed-web-server/set-password",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 180,
+        "y": 460,
+        "wires": [
+            [
+                "dcc1da0cb6a67d09"
+            ]
+        ]
+    },
+    {
+        "id": "4a04a1b60c301ffd",
+        "type": "http in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "url": "closed-web-server/delete-user",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 170,
+        "y": 640,
+        "wires": [
+            [
+                "abf3f2a8de59aebe"
+            ]
+        ]
+    },
+    {
+        "id": "dcc1da0cb6a67d09",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "allow if no password set",
+        "func": "let Body = msg.req.body || {}\n\nlet UserId   = Body.userid   || ''\nlet Password = Body.password || ''\n\nlet UserEntry = (flow.get('Users') || {})[UserId]\nif (UserEntry === '') {\n  return [msg,null,null] // allow password reset\n}\n\nreturn [null,msg,null] // require authorization\n",
+        "outputs": 3,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 170,
+        "y": 520,
+        "wires": [
+            [
+                "9d2993165c9031c3"
+            ],
+            [
+                "4ab7924f7b8112e9"
+            ],
+            [
+                "cd689836f2965f20"
+            ]
+        ]
+    },
+    {
+        "id": "4ab7924f7b8112e9",
+        "type": "component",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "targetComponent": {
+            "id": "04466d635fe4b369",
+            "name": "check authorization",
+            "api": []
+        },
+        "paramSources": {},
+        "statuz": "",
+        "statuzType": "str",
+        "outputs": 2,
+        "outLabels": [
+            "authorized",
+            "unauthorized"
+        ],
+        "x": 420,
+        "y": 520,
+        "wires": [
+            [
+                "9d2993165c9031c3"
+            ],
+            [
+                "cd689836f2965f20"
+            ]
+        ]
+    },
+    {
+        "id": "9d2993165c9031c3",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "set password",
+        "func": "const twoMinutes = 2*60*1000\n\nlet Body = msg.req.body || {}\n  let UserId   = Body.userid   || ''\n  let Password = Body.password || ''\n  \n  if (UserId === '') {\n    msg.payload    = 'Bad Request: missing userid'\n    msg.statusCode = 400\n    return [null,msg]\n  }\n  \n  if (Password.length < 8) {\n    msg.payload    = 'Bad Request: password too short'\n    msg.statusCode = 400\n    return [null,msg]\n  }\n  \n  let PasswordSalt = crypto.randomBytes(16).toString('hex')\n  let PasswordHash = crypto.pbkdf2Sync(\n    Password, PasswordSalt, 100000, 64, 'sha512'\n  ).toString('hex')\n  \n  let Users = flow.get('Users') || {}\n    Users[UserId] = PasswordSalt + ':' + PasswordHash\n  flow.set('Users',Users)\nmsg.cookies = { authorization:null }\n\nmsg.payload    = 'No Content'\nmsg.statusCode = 204\nreturn [msg,null]\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 140,
+        "y": 580,
+        "wires": [
+            [
+                "b610c3de3f6d76f3"
+            ],
+            [
+                "cd689836f2965f20"
+            ]
+        ]
+    },
+    {
+        "id": "b610c3de3f6d76f3",
+        "type": "component",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "targetComponent": {
+            "id": "15fdaffc165dcddc",
+            "name": "write User Set",
+            "api": []
+        },
+        "paramSources": {},
+        "statuz": "",
+        "statuzType": "str",
+        "outputs": 1,
+        "outLabels": [
+            "default"
+        ],
+        "x": 350,
+        "y": 580,
+        "wires": [
+            [
+                "cd689836f2965f20"
+            ]
+        ]
+    },
+    {
+        "id": "cd689836f2965f20",
+        "type": "http response",
+        "z": "80deaf3fb9cfc52d",
+        "name": "http",
+        "statusCode": "",
+        "headers": {},
+        "x": 530,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "abf3f2a8de59aebe",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "skip if unused",
+        "func": "let Body = msg.req.body || {}\n\nlet UserId = Body.userid || ''\nif (UserId === '') {\n  msg.payload    = 'Bad Request: missing userid'\n  msg.statusCode = 400\n  return [null,null,msg]\n}\n\nlet UserEntry = (flow.get('Users') || {})[UserId]\nif (UserEntry == null) {\n  msg.payload    = 'No Content'\n  msg.statusCode = 204\n  return [null,null,msg]\n}\n\nif (UserEntry === '') {\n  return [msg,null,null] // allow removal w/o authorization\n} else {\n  return [null,msg,null] // require authorization\n}\n\n",
+        "outputs": 3,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 140,
+        "y": 700,
+        "wires": [
+            [
+                "58ca10af96f0ad31"
+            ],
+            [
+                "577d346af4a85962"
+            ],
+            [
+                "410cd89e0af369f3"
+            ]
+        ]
+    },
+    {
+        "id": "577d346af4a85962",
+        "type": "component",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "targetComponent": {
+            "id": "04466d635fe4b369",
+            "name": "check authorization",
+            "api": []
+        },
+        "paramSources": {},
+        "statuz": "",
+        "statuzType": "str",
+        "outputs": 2,
+        "outLabels": [
+            "authorized",
+            "unauthorized"
+        ],
+        "x": 360,
+        "y": 700,
+        "wires": [
+            [
+                "58ca10af96f0ad31"
+            ],
+            [
+                "410cd89e0af369f3"
+            ]
+        ]
+    },
+    {
+        "id": "58ca10af96f0ad31",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "delete user",
+        "func": "let Body = msg.req.body || {}\n  let UserId = Body.userid || ''\n\n  let Users = flow.get('Users') || {}\n    delete Users[UserId]\n  flow.set('Users',Users)\nmsg.cookies = { authentication: '' }\n\nmsg.payload    = 'No Content'\nmsg.statusCode = 204\nreturn [msg,null]\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 130,
+        "y": 760,
+        "wires": [
+            [
+                "73b03ba6d85462f3"
+            ],
+            [
+                "410cd89e0af369f3"
+            ]
+        ]
+    },
+    {
+        "id": "73b03ba6d85462f3",
+        "type": "component",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "targetComponent": {
+            "id": "15fdaffc165dcddc",
+            "name": "write User Set",
+            "api": []
+        },
+        "paramSources": {},
+        "statuz": "",
+        "statuzType": "str",
+        "outputs": 1,
+        "outLabels": [
+            "default"
+        ],
+        "x": 350,
+        "y": 760,
+        "wires": [
+            [
+                "410cd89e0af369f3"
+            ]
+        ]
+    },
+    {
+        "id": "410cd89e0af369f3",
+        "type": "http response",
+        "z": "80deaf3fb9cfc52d",
+        "name": "http",
+        "statusCode": "",
+        "headers": {},
+        "x": 530,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "3e99601e442e0368",
+        "type": "http in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "url": "closed-web-server/login",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 820,
+        "wires": [
+            [
+                "4843873607bc6c4d"
+            ]
+        ]
+    },
+    {
+        "id": "4843873607bc6c4d",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "validate credentials",
+        "func": "let Body = msg.req.body || {}\n\nlet UserId   = Body.userid   || ''\nlet Password = Body.password || ''\n\nlet UserEntry = (flow.get('Users') || {})[UserId] || ''\nif (UserEntry !== '') {\n  let [storedSalt,storedHash] = UserEntry.split(':')\n  \n  let computedHash = crypto.pbkdf2Sync(\n    Password, storedSalt, 100000, 64, 'sha512'\n  ).toString('hex')\n  \n  if (storedHash === computedHash) { // user-id and password are correct\n    msg.UserId  = UserId // will later be stored in the access token\n    msg.payload = ''     // never pass any credentials\n    return [msg,null]    // authorized\n  }\n}\n\nmsg.payload    = 'Unauthorized'\nmsg.statusCode = 401\nreturn [null,msg] // not authorized\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 150,
+        "y": 880,
+        "wires": [
+            [
+                "f0353d3cd3c86c2e"
+            ],
+            [
+                "b785ad6f4e3503fa"
+            ]
+        ]
+    },
+    {
+        "id": "f0353d3cd3c86c2e",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "create token",
+        "func": "const twoMinutes = 2*60*1000\n\nlet TokenContent = msg.UserId + ':' + (Date.now()+twoMinutes)\n\nlet TokenKey = flow.get('TokenKey')\n  const HMAC = crypto.createHmac('sha256',TokenKey)\n  HMAC.update(TokenContent)\nlet Digest = HMAC.digest('hex')\n\nmsg.cookies = { authentication: TokenContent + ':' + Digest }\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 350,
+        "y": 880,
+        "wires": [
+            [
+                "9783beb2630ae8b7"
+            ]
+        ]
+    },
+    {
+        "id": "9783beb2630ae8b7",
+        "type": "http response",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "statusCode": "204",
+        "headers": {},
+        "x": 520,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "b785ad6f4e3503fa",
+        "type": "http response",
+        "z": "80deaf3fb9cfc52d",
+        "name": "http",
+        "statusCode": "",
+        "headers": {},
+        "x": 530,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "4656484799d4e4ab",
+        "type": "component",
+        "z": "80deaf3fb9cfc52d",
+        "name": "-> check auth.",
+        "targetComponent": {
+            "id": "04466d635fe4b369",
+            "name": "check authorization",
+            "api": []
+        },
+        "paramSources": {},
+        "statuz": "",
+        "statuzType": "str",
+        "outputs": 2,
+        "outLabels": [
+            "authorized",
+            "unauthorized"
+        ],
+        "x": 140,
+        "y": 280,
+        "wires": [
+            [
+                "40a3c7a34f053d97"
+            ],
+            [
+                "9dd4030d85f45096"
+            ]
+        ]
+    },
+    {
+        "id": "40a3c7a34f053d97",
+        "type": "change",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "filename",
+                "pt": "msg",
+                "to": "req.params.Path",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 190,
+        "y": 340,
+        "wires": [
+            [
+                "0f194ff08c5750fd"
+            ]
+        ]
+    },
+    {
+        "id": "b8c6250c90bbed04",
+        "type": "comment",
+        "z": "80deaf3fb9cfc52d",
+        "name": "offline Methods for Authorization Management",
+        "info": "",
+        "x": 850,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "57f46ea83e4db012",
+        "type": "inject",
+        "z": "80deaf3fb9cfc52d",
+        "name": "at Startup",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payloadType": "date",
+        "x": 770,
+        "y": 160,
+        "wires": [
+            [
+                "41ea030e6d3c0598"
+            ]
+        ]
+    },
+    {
+        "id": "bab2daf6a53c64d9",
+        "type": "file in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "filename": "./Users.json",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "utf8",
+        "allProps": false,
+        "x": 1010,
+        "y": 640,
+        "wires": [
+            [
+                "b99331de581310c2"
+            ]
+        ]
+    },
+    {
+        "id": "c32298dfe46ad556",
+        "type": "inject",
+        "z": "80deaf3fb9cfc52d",
+        "name": "delete user",
+        "props": [
+            {
+                "p": "user-id",
+                "v": "rozek",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payloadType": "str",
+        "x": 760,
+        "y": 520,
+        "wires": [
+            [
+                "814f545ff963cecc"
+            ]
+        ]
+    },
+    {
+        "id": "b99331de581310c2",
+        "type": "json",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 770,
+        "y": 700,
+        "wires": [
+            [
+                "b2f1316546e5deea"
+            ]
+        ]
+    },
+    {
+        "id": "b2f1316546e5deea",
+        "type": "change",
+        "z": "80deaf3fb9cfc52d",
+        "name": "save in flow context",
+        "rules": [
+            {
+                "t": "set",
+                "p": "Users",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 700,
+        "wires": [
+            [
+                "8575505aa9d890b0"
+            ]
+        ]
+    },
+    {
+        "id": "5231957bec9c7cce",
+        "type": "catch",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "scope": [
+            "b99331de581310c2",
+            "bab2daf6a53c64d9"
+        ],
+        "uncaught": false,
+        "x": 770,
+        "y": 760,
+        "wires": [
+            [
+                "4f644f2def1006a4"
+            ]
+        ]
+    },
+    {
+        "id": "da8dddc32f162bab",
+        "type": "debug",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "'could not load users'",
+        "statusType": "jsonata",
+        "x": 1150,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "0e67c007b2cd1045",
+        "type": "debug",
+        "z": "80deaf3fb9cfc52d",
+        "name": "Status",
+        "active": true,
+        "tosidebar": false,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "'users loaded'",
+        "statusType": "jsonata",
+        "x": 1190,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "4f644f2def1006a4",
+        "type": "change",
+        "z": "80deaf3fb9cfc52d",
+        "name": "create in flow context",
+        "rules": [
+            {
+                "t": "set",
+                "p": "Users",
+                "pt": "flow",
+                "to": "{}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 760,
+        "wires": [
+            [
+                "da8dddc32f162bab"
+            ]
+        ]
+    },
+    {
+        "id": "996489424ed9b3b1",
+        "type": "file",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "filename": "./Users.json",
+        "appendNewline": false,
+        "createDir": false,
+        "overwriteFile": "true",
+        "encoding": "utf8",
+        "x": 930,
+        "y": 880,
+        "wires": [
+            [
+                "5c9becba3c2ad1aa"
+            ]
+        ]
+    },
+    {
+        "id": "b1bccbe658cf378e",
+        "type": "json",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "property": "payload",
+        "action": "str",
+        "pretty": false,
+        "x": 770,
+        "y": 880,
+        "wires": [
+            [
+                "996489424ed9b3b1"
+            ]
+        ]
+    },
+    {
+        "id": "6edce1733b761832",
+        "type": "debug",
+        "z": "80deaf3fb9cfc52d",
+        "name": "Status",
+        "active": true,
+        "tosidebar": false,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "'user set updated'",
+        "statusType": "jsonata",
+        "x": 1190,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "c5460f0e4cf425fb",
+        "type": "catch",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "scope": [
+            "996489424ed9b3b1",
+            "b1bccbe658cf378e"
+        ],
+        "uncaught": false,
+        "x": 770,
+        "y": 940,
+        "wires": [
+            [
+                "7afc6a7dfdc2f9b4"
+            ]
+        ]
+    },
+    {
+        "id": "7afc6a7dfdc2f9b4",
+        "type": "debug",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "'could not write users'",
+        "statusType": "jsonata",
+        "x": 910,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "814f545ff963cecc",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "update flow context",
+        "func": "let Users = flow.get('Users') || {}\n  delete Users[msg.UserId]\nflow.set('Users',Users)\n\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 960,
+        "y": 520,
+        "wires": [
+            [
+                "2be18d3e2a75b18c"
+            ]
+        ]
+    },
+    {
+        "id": "1c33d24237575599",
+        "type": "inject",
+        "z": "80deaf3fb9cfc52d",
+        "name": "at Startup",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payloadType": "date",
+        "x": 770,
+        "y": 220,
+        "wires": [
+            [
+                "2d74506d45fc0194"
+            ]
+        ]
+    },
+    {
+        "id": "2d74506d45fc0194",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "generate Token Key",
+        "func": "flow.set('TokenKey',crypto.randomBytes(16).toString('hex'))\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 980,
+        "y": 220,
+        "wires": [
+            [
+                "22e06c36beb8dbf1"
+            ]
+        ]
+    },
+    {
+        "id": "22e06c36beb8dbf1",
+        "type": "debug",
+        "z": "80deaf3fb9cfc52d",
+        "name": "Status",
+        "active": true,
+        "tosidebar": false,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "'token key generated'",
+        "statusType": "jsonata",
+        "x": 1190,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "dc1e3a8e0b560a77",
+        "type": "inject",
+        "z": "80deaf3fb9cfc52d",
+        "name": "(re)set user",
+        "props": [
+            {
+                "p": "UserId",
+                "v": "rozek",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payloadType": "str",
+        "x": 760,
+        "y": 400,
+        "wires": [
+            [
+                "b03779e7769e2ad0"
+            ]
+        ]
+    },
+    {
+        "id": "98dc84a2ff03329b",
+        "type": "comment",
+        "z": "80deaf3fb9cfc52d",
+        "name": "Authorization Management",
+        "info": "",
+        "x": 790,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "b03779e7769e2ad0",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "update flow context",
+        "func": "let Users = flow.get('Users') || {}\n  Users[msg.UserId] = ''\nflow.set('Users',Users)\n\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 960,
+        "y": 400,
+        "wires": [
+            [
+                "2be18d3e2a75b18c"
+            ]
+        ]
+    },
+    {
+        "id": "6b82d0e8dc8f7cbb",
+        "type": "component_in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "read or create User Set",
+        "api": [],
+        "x": 780,
+        "y": 640,
+        "wires": [
+            [
+                "bab2daf6a53c64d9"
+            ]
+        ]
+    },
+    {
+        "id": "41ea030e6d3c0598",
+        "type": "component",
+        "z": "80deaf3fb9cfc52d",
+        "name": "read or create User Set",
+        "targetComponent": {
+            "id": "6b82d0e8dc8f7cbb",
+            "name": "read or create User Set",
+            "api": []
+        },
+        "paramSources": {},
+        "statuz": "",
+        "statuzType": "str",
+        "outputs": 1,
+        "outLabels": [
+            "default"
+        ],
+        "x": 990,
+        "y": 160,
+        "wires": [
+            [
+                "0e67c007b2cd1045"
+            ]
+        ]
+    },
+    {
+        "id": "15fdaffc165dcddc",
+        "type": "component_in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "write User Set",
+        "api": [],
+        "x": 750,
+        "y": 820,
+        "wires": [
+            [
+                "53524a8fd09f5328"
+            ]
+        ]
+    },
+    {
+        "id": "53524a8fd09f5328",
+        "type": "change",
+        "z": "80deaf3fb9cfc52d",
+        "name": "load from flow context",
+        "rules": [
+            {
+                "t": "set",
+                "p": "_payload",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Users",
+                "tot": "flow"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 820,
+        "wires": [
+            [
+                "b1bccbe658cf378e"
+            ]
+        ]
+    },
+    {
+        "id": "2be18d3e2a75b18c",
+        "type": "component",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "targetComponent": {
+            "id": "15fdaffc165dcddc",
+            "name": "write User Set",
+            "api": []
+        },
+        "paramSources": {},
+        "statuz": "",
+        "statuzType": "str",
+        "outputs": 1,
+        "outLabels": [
+            "default"
+        ],
+        "x": 1010,
+        "y": 460,
+        "wires": [
+            [
+                "6edce1733b761832"
+            ]
+        ]
+    },
+    {
+        "id": "8575505aa9d890b0",
+        "type": "component_out",
+        "z": "80deaf3fb9cfc52d",
+        "name": "return",
+        "mode": "default",
+        "x": 1150,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "1243c1c121dee66e",
+        "type": "component_out",
+        "z": "80deaf3fb9cfc52d",
+        "name": "user set written",
+        "mode": "default",
+        "x": 1160,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "04466d635fe4b369",
+        "type": "component_in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "check authorization",
+        "api": [],
+        "x": 770,
+        "y": 1000,
+        "wires": [
+            [
+                "d8f5a8a6e059d0cf"
+            ]
+        ]
+    },
+    {
+        "id": "d8f5a8a6e059d0cf",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "validate token",
+        "func": "let Cookie = ((msg.req.cookies || {}).authentication || '').trim()\nif (Cookie !== '') {\n  let [UserId,Expiration,Digest] = Cookie.split(':')\n  if (\n    (UserId !== '') && /^\\d+$/.test(Expiration) && /^[0-9a-fA-F]+$/.test(Digest)\n  ) {\n    let TokenKey = flow.get('TokenKey')\n      const HMAC = crypto.createHmac('sha256',TokenKey)\n      HMAC.update(UserId + ':' + Expiration)\n    let expectedDigest = HMAC.digest('hex')\n\n    if (\n      (Digest === expectedDigest) &&\n      (parseInt(Expiration,10) >= Date.now())\n    ) {\n      msg.cookies = { authentication:Cookie }\n      return [msg,null] // authorized\n    }\n  }\n}\n\nmsg.payload    = 'Unauthorized'\nmsg.statusCode = 401\nreturn [null,msg] // not authorized\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 980,
+        "y": 1000,
+        "wires": [
+            [
+                "6ae21f93d1a31225"
+            ],
+            [
+                "25d0c3085349d3a7"
+            ]
+        ]
+    },
+    {
+        "id": "6ae21f93d1a31225",
+        "type": "component_out",
+        "z": "80deaf3fb9cfc52d",
+        "name": "authorized",
+        "mode": "separate",
+        "x": 1170,
+        "y": 980,
+        "wires": []
+    },
+    {
+        "id": "25d0c3085349d3a7",
+        "type": "component_out",
+        "z": "80deaf3fb9cfc52d",
+        "name": "unauthorized",
+        "mode": "separate",
+        "x": 1170,
+        "y": 1020,
+        "wires": []
+    },
+    {
+        "id": "d7b2dae34c1be2ab",
+        "type": "component_in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "refresh token",
+        "api": [],
+        "x": 750,
+        "y": 1060,
+        "wires": [
+            [
+                "80c8478cdebbedfe"
+            ]
+        ]
+    },
+    {
+        "id": "80c8478cdebbedfe",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "update token",
+        "func": "const twoMinutes = 2*60*1000\n\nlet UserId = msg.cookies.authentication.split(':')[0]\n\nlet Expiration   = Date.now() + twoMinutes\nlet TokenContent = UserId + ':' + Expiration\n  \nlet TokenKey = flow.get('TokenKey')\n  const HMAC = crypto.createHmac('sha256',TokenKey)\n  HMAC.update(TokenContent)\nlet Digest = HMAC.digest('hex')\n\nmsg.cookies = { authentication: TokenContent + ':' + Digest }\nreturn msg\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 930,
+        "y": 1060,
+        "wires": [
+            [
+                "f3c1b92abdf537fc"
+            ]
+        ]
+    },
+    {
+        "id": "f3c1b92abdf537fc",
+        "type": "component_out",
+        "z": "80deaf3fb9cfc52d",
+        "name": "return",
+        "mode": "default",
+        "x": 1090,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "5c9becba3c2ad1aa",
+        "type": "change",
+        "z": "80deaf3fb9cfc52d",
+        "name": "restore payload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "_payload",
+                "tot": "msg"
+            },
+            {
+                "t": "delete",
+                "p": "_payload",
+                "pt": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1120,
+        "y": 880,
+        "wires": [
+            [
+                "1243c1c121dee66e"
+            ]
+        ]
+    },
+    {
+        "id": "40e8f47d151dcfdf",
+        "type": "inject",
+        "z": "80deaf3fb9cfc52d",
+        "name": "list users",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 760,
+        "y": 340,
+        "wires": [
+            [
+                "908896979f346b80"
+            ]
+        ]
+    },
+    {
+        "id": "908896979f346b80",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "build from flow context",
+        "func": "let Users = flow.get('Users') || {}\n  let UserList = []\n  for (let UserName in Users) {\n    if (Users.hasOwnProperty(UserName)) {\n      UserList.push(\n        Users[UserName] === '' ? '[' + UserName + ']' : UserName\n      )\n    }\n  }\nmsg.payload = (\n  UserList.length === 0\n  ? '(no user registered)'\n  : 'registered users: \"' + UserList.join('\",\"') + '\"'\n)\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 970,
+        "y": 340,
+        "wires": [
+            [
+                "26ea0e3442ae42bb"
+            ]
+        ]
+    },
+    {
+        "id": "26ea0e3442ae42bb",
+        "type": "debug",
+        "z": "80deaf3fb9cfc52d",
+        "name": "show",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1170,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "c311beadf96becde",
+        "type": "link out",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "links": [
+            "1bdc717ca4961131"
+        ],
+        "x": 535,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "1bdc717ca4961131",
+        "type": "link in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "entry point for custom Web Server",
+        "links": [
+            "c311beadf96becde"
+        ],
+        "x": 1355,
+        "y": 160,
+        "wires": [
+            [
+                "777a7b089bb317ca"
+            ]
+        ]
+    },
+    {
+        "id": "4a669847d94308b0",
+        "type": "file in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "./public/<FilePath>",
+        "filename": "",
+        "format": "",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 1690,
+        "y": 220,
+        "wires": [
+            [
+                "6f03f71d9e4a060e"
+            ]
+        ]
+    },
+    {
+        "id": "7915ea96b716fd0b",
+        "type": "http response",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "statusCode": "200",
+        "headers": {},
+        "x": 1840,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "bf62212eb6df529c",
+        "type": "catch",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "scope": [
+            "777a7b089bb317ca"
+        ],
+        "uncaught": false,
+        "x": 1430,
+        "y": 260,
+        "wires": [
+            [
+                "108ba91e9e09f885"
+            ]
+        ]
+    },
+    {
+        "id": "0ed5440d2e9ec7fc",
+        "type": "change",
+        "z": "80deaf3fb9cfc52d",
+        "name": "Bad Request",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Bad Request",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "statusCode",
+                "pt": "msg",
+                "to": "400",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1690,
+        "y": 360,
+        "wires": [
+            [
+                "f8f2b6ad609adaf2"
+            ]
+        ]
+    },
+    {
+        "id": "f8f2b6ad609adaf2",
+        "type": "http response",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1850,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "108ba91e9e09f885",
+        "type": "switch",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "property": "error.message",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "regex",
+                "v": "^Error:.ENOENT",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "regex",
+                "v": "^Error:.EISDIR",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 1470,
+        "y": 340,
+        "wires": [
+            [
+                "9663d6915dd28f41"
+            ],
+            [
+                "e15c542c11a1295c"
+            ],
+            [
+                "0ed5440d2e9ec7fc"
+            ]
+        ]
+    },
+    {
+        "id": "9663d6915dd28f41",
+        "type": "change",
+        "z": "80deaf3fb9cfc52d",
+        "name": "404",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Not Found",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "statusCode",
+                "pt": "msg",
+                "to": "404",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1670,
+        "y": 320,
+        "wires": [
+            [
+                "f8f2b6ad609adaf2",
+                "2f71f95b3eb3f003"
+            ]
+        ]
+    },
+    {
+        "id": "777a7b089bb317ca",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "normalize filename",
+        "func": "let FilePath = msg.filename.trim()\n  .replace(/^\\/+/,'')     // remove any leading \"/\"\n  .replace(/\\/+$/,'')     // remove trailing \"/\"s\n  .replace(/\\/\\/+/g,'/')  // reduce multiple \"/\"\n\n  let PathList = FilePath.split('/'), Result = []\n  Loop: for (let i = 0, l = PathList.length; i < l; i++) {\n    let PathItem = PathList[i].trim()\n    switch (PathItem) {\n      case '.':  break\n      case '..': if (Result.length === 0) {\n                   break Loop\n                 } else {\n                   Result.pop()\n                 }\n                 break\n      default:   Result.push(PathItem)\n    }\n  }\n  if (Result.length === 0) {\n    throw new Error('ENOENT')\n  }\nmsg.filename = './public/' + Result.join('/')\n\nreturn msg\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1470,
+        "y": 220,
+        "wires": [
+            [
+                "4a669847d94308b0"
+            ]
+        ]
+    },
+    {
+        "id": "eb546102b4e048ed",
+        "type": "file in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "./public/<FilePath>",
+        "filename": "",
+        "format": "",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 1710,
+        "y": 420,
+        "wires": [
+            [
+                "cb8ddabea0f12bbc"
+            ]
+        ]
+    },
+    {
+        "id": "be773787b52ec2c3",
+        "type": "catch",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "scope": [
+            "eb546102b4e048ed"
+        ],
+        "uncaught": false,
+        "x": 1470,
+        "y": 460,
+        "wires": [
+            [
+                "446574b15acd23a5"
+            ]
+        ]
+    },
+    {
+        "id": "446574b15acd23a5",
+        "type": "switch",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "property": "error.message",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "regex",
+                "v": "^Error:.ENOENT",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1610,
+        "y": 460,
+        "wires": [
+            [
+                "9663d6915dd28f41"
+            ],
+            [
+                "0ed5440d2e9ec7fc"
+            ]
+        ]
+    },
+    {
+        "id": "759d18bec2b4d331",
+        "type": "catch",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "scope": [
+            "4a669847d94308b0"
+        ],
+        "uncaught": false,
+        "x": 1650,
+        "y": 260,
+        "wires": [
+            [
+                "108ba91e9e09f885"
+            ]
+        ]
+    },
+    {
+        "id": "6f03f71d9e4a060e",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "set Content-Type",
+        "func": "let FileTypeMappings = flow.get('FileTypeMappings') || {}\n\nlet FileSuffix  = (/[.][^.]+$/.exec(msg.filename) || [])[0] || ''\nlet ContentType = FileTypeMappings[FileSuffix] || 'application/octet-stream'\n\nmsg.headers = msg.headers || {}\n  msg.headers['Content-Type'] = ContentType\nreturn msg\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1650,
+        "y": 520,
+        "wires": [
+            [
+                "7915ea96b716fd0b",
+                "8b201a8e7cc69dc2"
+            ]
+        ]
+    },
+    {
+        "id": "5bf622e415da39fe",
+        "type": "inject",
+        "z": "80deaf3fb9cfc52d",
+        "name": "at Startup",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payloadType": "date",
+        "x": 1430,
+        "y": 780,
+        "wires": [
+            [
+                "2277b95d45f4c5c0"
+            ]
+        ]
+    },
+    {
+        "id": "2277b95d45f4c5c0",
+        "type": "file in",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "filename": "./FileTypeMappings.json",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "utf8",
+        "allProps": false,
+        "x": 1630,
+        "y": 780,
+        "wires": [
+            [
+                "58e0939136d6b497"
+            ]
+        ]
+    },
+    {
+        "id": "58e0939136d6b497",
+        "type": "json",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 1450,
+        "y": 840,
+        "wires": [
+            [
+                "a384b9e706c5a694"
+            ]
+        ]
+    },
+    {
+        "id": "a384b9e706c5a694",
+        "type": "change",
+        "z": "80deaf3fb9cfc52d",
+        "name": "save in flow context",
+        "rules": [
+            {
+                "t": "set",
+                "p": "FileTypeMappings",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1640,
+        "y": 840,
+        "wires": [
+            [
+                "9fa0e3127a6e58d1"
+            ]
+        ]
+    },
+    {
+        "id": "0a39d141f8753b00",
+        "type": "catch",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "scope": [
+            "2277b95d45f4c5c0",
+            "58e0939136d6b497"
+        ],
+        "uncaught": false,
+        "x": 1450,
+        "y": 880,
+        "wires": [
+            [
+                "a695db477a00d865"
+            ]
+        ]
+    },
+    {
+        "id": "a695db477a00d865",
+        "type": "debug",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "'could not load mappings'",
+        "statusType": "jsonata",
+        "x": 1590,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "a3fbb11302c3b863",
+        "type": "comment",
+        "z": "80deaf3fb9cfc52d",
+        "name": "FileTypeMappings.json maps File Suffixes to MIME-Types",
+        "info": "",
+        "x": 1550,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "1b30a587a09765bd",
+        "type": "catch",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "scope": null,
+        "uncaught": true,
+        "x": 1420,
+        "y": 620,
+        "wires": [
+            [
+                "f4a582ef3da8f7a6",
+                "0521a7e402803588"
+            ]
+        ]
+    },
+    {
+        "id": "f4a582ef3da8f7a6",
+        "type": "change",
+        "z": "80deaf3fb9cfc52d",
+        "name": "internal Error",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Internal Server Error",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "statusCode",
+                "pt": "msg",
+                "to": "500",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1610,
+        "y": 620,
+        "wires": [
+            [
+                "ce421eb1518eac12"
+            ]
+        ]
+    },
+    {
+        "id": "ce421eb1518eac12",
+        "type": "http response",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "statusCode": "500",
+        "headers": {},
+        "x": 1840,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "0521a7e402803588",
+        "type": "debug",
+        "z": "80deaf3fb9cfc52d",
+        "name": "show error on console",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1640,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "2f71f95b3eb3f003",
+        "type": "debug",
+        "z": "80deaf3fb9cfc52d",
+        "name": "report",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "'file not found: ' & msg.filename",
+        "targetType": "jsonata",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1830,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "9fa0e3127a6e58d1",
+        "type": "debug",
+        "z": "80deaf3fb9cfc52d",
+        "name": "Status",
+        "active": true,
+        "tosidebar": false,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "'mappings loaded'",
+        "statusType": "jsonata",
+        "x": 1830,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "cb8ddabea0f12bbc",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "set Location",
+        "func": "let completeURL = msg.req.url\nlet URLPrefix   = /^\\/[^\\/]+/.exec(completeURL)[0]\n\nmsg.headers = msg.headers || {}\n  let Location = msg.filename.replace('./public',URLPrefix)\n  msg.headers['Location'] = Location\nreturn msg\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1630,
+        "y": 560,
+        "wires": [
+            [
+                "5ce186c476e11357"
+            ]
+        ]
+    },
+    {
+        "id": "5ce186c476e11357",
+        "type": "http response",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "statusCode": "301",
+        "headers": {},
+        "x": 1840,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "e15c542c11a1295c",
+        "type": "function",
+        "z": "80deaf3fb9cfc52d",
+        "name": "add /index.html",
+        "func": "msg.filename = msg.filename + (\n  msg.filename.endsWith('/') ? '' : '/'\n) + 'index.html'\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1500,
+        "y": 420,
+        "wires": [
+            [
+                "eb546102b4e048ed"
+            ]
+        ]
+    },
+    {
+        "id": "8b201a8e7cc69dc2",
+        "type": "debug",
+        "z": "80deaf3fb9cfc52d",
+        "name": "report",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "'serving: ' & msg.filename",
+        "targetType": "jsonata",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1830,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "eeb242011576773d",
+        "type": "comment",
+        "z": "80deaf3fb9cfc52d",
+        "name": "serving file-based content",
+        "info": "",
+        "x": 1450,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "9cd0a730fb710f16",
+        "type": "comment",
+        "z": "80deaf3fb9cfc52d",
+        "name": "Components for Authorization Management",
+        "info": "",
+        "x": 850,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "fd96db0c22c59125",
+        "type": "comment",
+        "z": "80deaf3fb9cfc52d",
+        "name": "Developer-managed Authorization Handling",
+        "info": "",
+        "x": 410,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "0f194ff08c5750fd",
+        "type": "component",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "targetComponent": {
+            "id": "d7b2dae34c1be2ab",
+            "name": "refresh token",
+            "api": []
+        },
+        "paramSources": {},
+        "statuz": "",
+        "statuzType": "str",
+        "outputs": 1,
+        "outLabels": [
+            "default"
+        ],
+        "x": 400,
+        "y": 340,
+        "wires": [
+            [
+                "c311beadf96becde"
+            ]
+        ]
+    }
+]
