@@ -2,7 +2,7 @@
 
 This collection of [Node-RED](https://nodered.org/) examples (with a matching [Postman](https://www.postman.com/) collection for testing) is mainly intended for my students, but parts of it may also be of more general interest.
 
-It is the continuation of another set of [HTTP(S)-related examples](https://github.com/rozek/node-red-http-server-examples) and explains how to implement some basic file-based web servers with or without custom HTTP endpoints and with or without cookie-based authorization. The next step in this series is a collection of examples for [basic REST services](https://github.com/rozek/node-red-rest-service-examples), also built with Node-RED.
+It is the continuation of another set of [HTTP(S)-related examples](https://github.com/rozek/node-red-http-server-examples) and explains how to implement some basic file-based web servers with or without custom HTTP endpoints and with or without cookie-based authorization. The next step in this series is a collection of examples for [basic REST services](https://github.com/rozek/node-red-rest-server-examples), also built with Node-RED.
 
 For this series, it is assumed that the reader already installed Node-RED (as described in [Getting Started](https://nodered.org/docs/getting-started/)), optionally secured the editor (as shown in [Securing Node-RED](https://nodered.org/docs/user-guide/runtime/securing-node-red)) and started using it (as explained in [Creating your first flow](https://nodered.org/docs/tutorials/first-flow))
 
