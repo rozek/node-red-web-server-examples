@@ -794,7 +794,8 @@
         "y": 940,
         "wires": [
             [
-                "7afc6a7dfdc2f9b4"
+                "7afc6a7dfdc2f9b4",
+                "172620a272f1cf7b"
             ]
         ]
     },
@@ -812,7 +813,7 @@
         "statusVal": "'could not write users'",
         "statusType": "jsonata",
         "x": 910,
-        "y": 940,
+        "y": 1000,
         "wires": []
     },
     {
@@ -1094,9 +1095,9 @@
         "id": "1243c1c121dee66e",
         "type": "component_out",
         "z": "80deaf3fb9cfc52d",
-        "name": "user set written",
+        "name": "return",
         "mode": "default",
-        "x": 1160,
+        "x": 1190,
         "y": 940,
         "wires": []
     },
@@ -1107,7 +1108,7 @@
         "name": "check authorization",
         "api": [],
         "x": 770,
-        "y": 1000,
+        "y": 1060,
         "wires": [
             [
                 "d8f5a8a6e059d0cf"
@@ -1131,7 +1132,7 @@
             }
         ],
         "x": 980,
-        "y": 1000,
+        "y": 1060,
         "wires": [
             [
                 "6ae21f93d1a31225"
@@ -1148,7 +1149,7 @@
         "name": "authorized",
         "mode": "separate",
         "x": 1170,
-        "y": 980,
+        "y": 1040,
         "wires": []
     },
     {
@@ -1158,7 +1159,7 @@
         "name": "unauthorized",
         "mode": "separate",
         "x": 1170,
-        "y": 1020,
+        "y": 1080,
         "wires": []
     },
     {
@@ -1168,7 +1169,7 @@
         "name": "refresh token",
         "api": [],
         "x": 750,
-        "y": 1060,
+        "y": 1120,
         "wires": [
             [
                 "80c8478cdebbedfe"
@@ -1192,7 +1193,7 @@
             }
         ],
         "x": 930,
-        "y": 1060,
+        "y": 1120,
         "wires": [
             [
                 "f3c1b92abdf537fc"
@@ -1206,7 +1207,7 @@
         "name": "return",
         "mode": "default",
         "x": 1090,
-        "y": 1060,
+        "y": 1120,
         "wires": []
     },
     {
@@ -1986,6 +1987,45 @@
         "wires": [
             [
                 "c311beadf96becde"
+            ]
+        ]
+    },
+    {
+        "id": "172620a272f1cf7b",
+        "type": "change",
+        "z": "80deaf3fb9cfc52d",
+        "name": "restore payload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "'Internal Server Error'",
+                "tot": "jsonata"
+            },
+            {
+                "t": "set",
+                "p": "statusCode",
+                "pt": "msg",
+                "to": "500",
+                "tot": "str"
+            },
+            {
+                "t": "delete",
+                "p": "_payload",
+                "pt": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 940,
+        "y": 940,
+        "wires": [
+            [
+                "1243c1c121dee66e"
             ]
         ]
     }
