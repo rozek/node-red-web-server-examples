@@ -88,12 +88,12 @@ User data is kept in a JSON file called `Users.json` within the working director
 User names are arbitrary - this server does not make any assumptions about their format (except that they must not contain neither colons (":") nor control characters). Their length should however be limited since cookies are not allowed to occupy more than 4093 characters (including their name and some other cookie details) - assuming a length limit of 2048 bytes seems like a good idea.
 
 ![](examples/closed-web-server-I.png)
-![](examples/closed-web-server-II.png)
 ![](examples/closed-web-server-III.png)
+![](examples/closed-web-server-IV.png)
 
 The following part is already known from the previous examples:
 
-![](examples/serving-files.png)
+![](examples/closed-web-server-II.png)
 
 To test this server, just import the ["closed web server" example](examples/closed-web-server.json) into your Node-RED workspace and deploy. The included Postman collection contains several requests which allow you act like a user, any "administrative" operations have to be performed using Node-RED itself.
 
