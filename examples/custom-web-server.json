@@ -112,7 +112,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1020,
+        "x": 1000,
         "y": 280,
         "wires": [
             [
@@ -125,9 +125,9 @@
         "type": "http response",
         "z": "5879663705de9d62",
         "name": "",
-        "statusCode": "",
+        "statusCode": "200",
         "headers": {},
-        "x": 1190,
+        "x": 1180,
         "y": 280,
         "wires": []
     },
@@ -201,7 +201,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1020,
+        "x": 1000,
         "y": 340,
         "wires": [
             [
@@ -214,9 +214,9 @@
         "type": "http response",
         "z": "5879663705de9d62",
         "name": "",
-        "statusCode": "",
+        "statusCode": "200",
         "headers": {},
-        "x": 1190,
+        "x": 1180,
         "y": 340,
         "wires": []
     },
@@ -292,7 +292,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1020,
+        "x": 1000,
         "y": 400,
         "wires": [
             [
@@ -305,9 +305,9 @@
         "type": "http response",
         "z": "5879663705de9d62",
         "name": "",
-        "statusCode": "",
+        "statusCode": "200",
         "headers": {},
-        "x": 1190,
+        "x": 1180,
         "y": 400,
         "wires": []
     },
