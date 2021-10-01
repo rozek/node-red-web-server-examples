@@ -80,7 +80,7 @@ User data is kept in a JSON file called `registeredUsers.json` within the workin
 
 User names are arbitrary - this server does not make any assumptions about their format (except that they must not contain neither colons (":") nor control characters). Their length should however be limited since cookies are not allowed to occupy more than 4093 characters (including their name and some other cookie details) - assuming a length limit of 2048 bytes seems like a good idea.
 
-The main part of this server consists of HTTP entry points for file retrieval and user management, extended by some "offline" methods (for the flow developer) to create, list and delete users
+The main part of this server consists of HTTP entry points for file retrieval and user management, extended by some "offline" methods (for the flow developer) to create, list and delete users:
 
 ![](examples/closed-web-server-I.png)
 
