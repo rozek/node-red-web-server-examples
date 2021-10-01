@@ -89,6 +89,7 @@ User names are arbitrary - this server does not make any assumptions about their
 
 ![](examples/closed-web-server-I.png)
 ![](examples/closed-web-server-II.png)
+![](examples/closed-web-server-III.png)
 
 The following part is already known from the previous examples:
 
