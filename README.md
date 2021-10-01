@@ -4,6 +4,8 @@ This collection of [Node-RED](https://nodered.org/) examples (with a matching [P
 
 It is the continuation of another set of [HTTP(S)-related examples](https://github.com/rozek/node-red-http-endpoint-examples) and explains how to implement some basic file-based web servers with or without custom HTTP endpoints and with or without cookie-based authorization. The next step in this series is a collection of examples for [basic REST services](https://github.com/rozek/node-red-rest-service-examples), also built with Node-RED.
 
+While it is generally not a good idea to use Node-RED for a web server that just serves static files (as there is a myriad of alternatives which are more performant, more secure and have more features), it may become necessary if you plan to use a Node-RED hoster and have no control over the underlying server. One of the following examples may then be used to accompany the HTTP endpoints for which you need Node-RED in the first place.
+
 For this series, it is assumed that the reader already installed Node-RED (as described in [Getting Started](https://nodered.org/docs/getting-started/)), optionally secured the editor (as shown in [Securing Node-RED](https://nodered.org/docs/user-guide/runtime/securing-node-red)) and started using it (as explained in [Creating your first flow](https://nodered.org/docs/tutorials/first-flow))
 
 > Nota bene: this work is currently in progress, do not expect it to be finished before midth of October 2021
