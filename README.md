@@ -98,11 +98,11 @@ If this flow is not used within the [Express server with an embedded Node-RED in
 
 ![](examples/closed-web-server-IV.png)
 
-To test this server, just import the ["closed web server" example](examples/closed-web-server.json) into your Node-RED workspace and deploy. The included Postman collection contains several requests which allow you act like a user, any "administrative" operations have to be performed using Node-RED itself.
-
-In this example, *all* endpoints (except those needed for authorization management) demand a successful authorization before being processed. In practice, there is often a mixture of public and private endpoints - a situation which may easily be implemented by combining flows from this example and the previous one.
+To test this server, just import the ["closed web server" example](examples/closed-web-server.json) into your Node-RED workspace and deploy. Any "administrative" operations have to be performed using Node-RED itself, the included Postman collection expects that you create a user called "John.Doe@mail.de" and this user then sets its password in order to get access to the served web pages.
 
 > For this example to work, please copy file `FileTypeMappings.json` and folder `public` into the working directory of your Node-RED instance
+
+In this example, *all* endpoints (except those needed for authorization management) demand a successful authorization before being processed. In practice, there is often a mixture of public and private endpoints - a situation which may easily be implemented by combining flows from this example and the previous one.
 
 ## License ##
 
