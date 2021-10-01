@@ -100,6 +100,8 @@ To test this server, just import the ["closed web server" example](examples/clos
 
 In this example, *all* endpoints (except those needed for authorization management) demand a successful authorization before being processed. In practice, there is often a mixture of public and private endpoints - a situation which may easily be implemented by combining flows from this example and the previous one.
 
+> For this example to work, please copy file `FileTypeMappings.json` and folder `public` into the working directory of your Node-RED instance
+
 ## License ##
 
 [MIT License](LICENSE.md)
