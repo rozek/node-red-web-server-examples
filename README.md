@@ -72,7 +72,10 @@ Often, web servers are not completely open for everybody - instead, some (or all
 
 Protecting entry points usually implies some kind of authorization management. In the following example, Node-RED developers (like you) first have to explicitly create new users themselves (without specifying any initial password for them), and may later also reset user passwords or delete users - all this is done within the Node-RED server workspace. Without prior authorization, users created this way are only allowed to define their passwords or delete themselves as long as no password is set - this is done through HTTP endpoints (where it is assumed that these users are in contact with a Node-RED developer who informs them about the appropriate time). For all other operations users have to "login" first (presenting their user name and current password). They may then change their password, delete themselves - and navigate to the other endpoints this server offers.
 
-This kind of "developer-managed authorization handling" gives developers full control over the users they permit, but still keeps user passwords secret from them. On the other hand, users have full control over their passwords and may also delete their accounts - but no user is allowed to register him/herself. 
+This kind of "developer-driven user management" gives developers full control over the users they permit, but still keeps user passwords secret from them. On the other hand, users have full control over their passwords and may also delete their accounts - but no user is allowed to register him/herself. 
+
+
+
 
 Authorization itself is handled using "Cookies": upon "login" a "Token" is created which allows the logged-in user to access non-public endpoints for a certain period until he/she has to log-in again.
 
