@@ -74,26 +74,27 @@ Protecting entry points usually implies some kind of authorization management. I
 
 This kind of "developer-driven user management" gives developers full control over the users they permit, but still keeps user passwords secret from them. On the other hand, users have full control over their passwords and may also delete their accounts - but no user is allowed to register him/herself. 
 
+Authorization itself is handled using the "Cookie-based Authorization" taken from the author's [Node-RED Authorization Examples](https://github.com/rozek/node-red-authorization-examples) and may easily be replaced by a differend method (if "basic HTTP Authorization" is preferred, the "login" endpoint may be removed as it will be no longer necessary)
 
-
-
-Authorization itself is handled using "Cookies": upon "login" a "Token" is created which allows the logged-in user to access non-public endpoints for a certain period until he/she has to log-in again.
-
-The token itself consists of the requesting user's name and an expiration time (in this example, tokens remain valid for 2 minutes). While being sent in readable form, these details are protected using a "message digest" which is also part of the token cookie. As a consequence, any attempt to modify the cookie will immediately invalidate the token. The "secret" this message digest is based on is randomly generated upon Node-RED startup: any redeployment will therefore automatically invalidate any existing tokens.
-
-In order to make this behaviour more comfortable for the user, any successfully authorized operation also "refreshes" the access token. Thus, a new login will only be required after two minutes of inactivity.
-
-User data is kept in a JSON file called `Users.json` within the working directory of the running Node-RED instance. It will be read upon start-up and written whenever any user-related setting changes. The file contains a "dictionary" of user names with password hashes as values. These hashes are computed using PBKDF2 with random salt - this avoids having to store passwords in plain text form and makes automated dictionary attacks more difficult.
+User data is kept in a JSON file called `registeredUsers.json` within the working directory of the running Node-RED instance. It should be read upon start-up and written whenever any user-related setting changes. The file contains a "dictionary" of user names with password hashes and "role" lists as values. These hashes are computed using PBKDF2 with random salt - this avoids having to store passwords in plain text form and makes automated dictionary attacks more difficult.
 
 User names are arbitrary - this server does not make any assumptions about their format (except that they must not contain neither colons (":") nor control characters). Their length should however be limited since cookies are not allowed to occupy more than 4093 characters (including their name and some other cookie details) - assuming a length limit of 2048 bytes seems like a good idea.
 
-![](examples/closed-web-server-I.png)
-![](examples/closed-web-server-III.png)
-![](examples/closed-web-server-IV.png)
+The main part of this server consists of HTTP entry points for file retrieval and user management, extended by some "offline" methods (for the flow developer) to create, list and delete users
 
-The following part is already known from the previous examples:
+![](examples/closed-web-server-I.png)
+
+The actual file retrieval is already known from the previous examples:
 
 ![](examples/closed-web-server-II.png)
+
+As mentioned before, the actual authentication and authorization originates from [another package](https://github.com/rozek/node-red-authorization-examples) and is shown here for the sake of completeness only:
+
+![](examples/closed-web-server-III.png)
+
+If this flow is not used within the [Express server with an embedded Node-RED instance](https://github.com/rozek/node-red-within-express) - which is very likely as that server already serves static files itself - it will also be necessary to provide functions to read and write the user registry:
+
+![](examples/closed-web-server-IV.png)
 
 To test this server, just import the ["closed web server" example](examples/closed-web-server.json) into your Node-RED workspace and deploy. The included Postman collection contains several requests which allow you act like a user, any "administrative" operations have to be performed using Node-RED itself.
 
