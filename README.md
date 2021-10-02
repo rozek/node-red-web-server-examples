@@ -80,6 +80,8 @@ User data is kept in a JSON file called `registeredUsers.json` within the workin
 
 User ids are mostly arbitrary - this server does not make any assumptions about their format (except that they must not contain neither colons (":") nor control characters and the upper and lower case is not distinguished). Their length should however be limited since cookies are not allowed to occupy more than 4093 characters (including their name and some other cookie details) - assuming a length limit of 2048 bytes seems like a good idea.
 
+> For this example to work, please copy file `FileTypeMappings.json` and folder `public` into the working directory of your Node-RED instance
+
 The main part of this server consists of HTTP entry points for file retrieval and user management, extended by some "offline" methods (for the flow developer) to create, list and delete users:
 
 ![](examples/closed-web-server-I.png)
@@ -97,8 +99,6 @@ If this flow is not used within the [Express server with an embedded Node-RED in
 ![](examples/closed-web-server-IV.png)
 
 To test this server, just import the ["closed web server" example](examples/closed-web-server.json) into your Node-RED workspace and deploy. Any "administrative" operations have to be performed using Node-RED itself (just enter the names of the affected users into the `inject` nodes labelled "(re)set user" and "delete user"), the included Postman collection expects that you create a user called "John.Doe@mail.de" and this user then sets his password in order to get access to the served web pages.
-
-> For this example to work, please copy file `FileTypeMappings.json` and folder `public` into the working directory of your Node-RED instance
 
 In this example, *all* endpoints (except those needed for authorization management) demand a successful authorization before being processed. In practice, there is often a mixture of public and private endpoints - a situation which may easily be implemented by combining flows from this example and the previous one.
 
