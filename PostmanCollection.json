@@ -269,7 +269,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"userid\":\"{{Username}}\",\n  \"password\":\"{{Password}}\"\n}",
+							"raw": "{\n  \"UserId\":\"{{ClientName}}\",\n  \"Password\":\"{{ClientPassword}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -296,7 +296,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"userid\":\"{{Username}}\"\n}",
+							"raw": "{\n  \"UserId\":\"{{ClientName}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -323,7 +323,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"userid\":\"{{Username}}\",\n  \"password\":\"{{Password}}\"\n}",
+							"raw": "{\n  \"UserId\":\"{{ClientName}}\",\n  \"Password\":\"{{ClientPassword}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -393,6 +393,14 @@
 		{
 			"key": "Password",
 			"value": ""
+		},
+		{
+			"key": "ClientName",
+			"value": "John.Doe@mail.de"
+		},
+		{
+			"key": "ClientPassword",
+			"value": "v3ryS3cr3t!"
 		}
 	]
 }
