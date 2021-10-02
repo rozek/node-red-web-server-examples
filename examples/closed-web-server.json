@@ -130,17 +130,12 @@
         "type": "function",
         "z": "80deaf3fb9cfc52d",
         "name": "allow if no password set",
-        "func": "let Body = msg.req.body || {}\n\nlet UserId   = Body.userid   || ''\nlet Password = Body.password || ''\n\nlet UserEntry = (flow.get('Users') || {})[UserId]\nif (UserEntry === '') {\n  return [msg,null,null] // allow password reset\n}\n\nreturn [null,msg,null] // require authorization\n",
-        "outputs": 3,
+        "func": "let Body = msg.req.body || {}\n\nlet UserId   = (Body.UserId  || '').toLowerCase()\nlet Password = Body.Password || ''\n\nlet UserRegistry = (global.get('UserRegistry') || Object.create(null))\nif ((UserId in UserRegistry) && (UserRegistry[UserId] == null)) {\n  return [msg,null] // allow password reset\n}\n\nreturn [null,msg] // require authorization\n",
+        "outputs": 2,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
-        "libs": [
-            {
-                "var": "crypto",
-                "module": "crypto"
-            }
-        ],
+        "libs": [],
         "x": 170,
         "y": 480,
         "wires": [
@@ -149,9 +144,6 @@
             ],
             [
                 "c6b8fe651b5d9e1a"
-            ],
-            [
-                "cd689836f2965f20"
             ]
         ]
     },
@@ -160,7 +152,7 @@
         "type": "function",
         "z": "80deaf3fb9cfc52d",
         "name": "set password",
-        "func": "const twoMinutes = 2*60*1000\n\nlet Body = msg.req.body || {}\n  let UserId   = Body.userid   || ''\n  let Password = Body.password || ''\n  \n  if (UserId === '') {\n    msg.payload    = 'Bad Request: missing userid'\n    msg.statusCode = 400\n    return [null,msg]\n  }\n  \n  if (Password.length < 8) {\n    msg.payload    = 'Bad Request: password too short'\n    msg.statusCode = 400\n    return [null,msg]\n  }\n  \n  let PasswordSalt = crypto.randomBytes(16).toString('hex')\n  let PasswordHash = crypto.pbkdf2Sync(\n    Password, PasswordSalt, 100000, 64, 'sha512'\n  ).toString('hex')\n  \n  let Users = flow.get('Users') || {}\n    Users[UserId] = PasswordSalt + ':' + PasswordHash\n  flow.set('Users',Users)\nmsg.cookies = { authorization:null }\n\nmsg.payload    = 'No Content'\nmsg.statusCode = 204\nreturn [msg,null]\n",
+        "func": "const twoMinutes = 2*60*1000\n\nlet Body = msg.req.body || {}\n  let UserId   = (Body.UserId  || '').toLowerCase()\n  let Password = Body.Password || ''\n\n  if (UserId === '') {\n    msg.payload    = 'Bad Request: missing userid'\n    msg.statusCode = 400\n    return [null,msg]\n  }\n  \n  if (Password.length < 8) {\n    msg.payload    = 'Bad Request: password too short'\n    msg.statusCode = 400\n    return [null,msg]\n  }\n  \n  let PBKDF2Iterations = global.get('PBKDF2Iterations') || 100000\n\n  let PasswordSalt = crypto.randomBytes(16)\n  let PasswordHash = crypto.pbkdf2Sync(\n    Password, PasswordSalt, PBKDF2Iterations, 64, 'sha512'\n  )\n  \n  let UserRegistry = global.get('UserRegistry') || Object.create(null)\n    UserRegistry[UserId] = UserRegistry[UserId] || {}\n    UserRegistry[UserId].Salt = PasswordSalt.toString('hex')\n    UserRegistry[UserId].Hash = PasswordHash.toString('hex')\n  global.set('UserRegistry',UserRegistry)\nmsg.cookies = { authorization:null }\n\nmsg.payload    = 'No Content'\nmsg.statusCode = 204\nreturn [msg,null]\n",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -198,7 +190,7 @@
         "type": "function",
         "z": "80deaf3fb9cfc52d",
         "name": "skip if unused",
-        "func": "let Body = msg.req.body || {}\n\nlet UserId = Body.userid || ''\nif (UserId === '') {\n  msg.payload    = 'Bad Request: missing userid'\n  msg.statusCode = 400\n  return [null,null,msg]\n}\n\nlet UserEntry = (flow.get('Users') || {})[UserId]\nif (UserEntry == null) {\n  msg.payload    = 'No Content'\n  msg.statusCode = 204\n  return [null,null,msg]\n}\n\nif (UserEntry === '') {\n  return [msg,null,null] // allow removal w/o authorization\n} else {\n  return [null,msg,null] // require authorization\n}\n\n",
+        "func": "let Body = msg.req.body || {}\n\nlet UserId = (Body.UserId || '').toLowerCase()\nif (UserId === '') {\n  msg.payload    = 'Bad Request: missing userid'\n  msg.statusCode = 400\n  return [null,null,msg]\n}\n\nlet UserRegistry = global.get('UserRegistry') || Object.create(null)\nif (! (UserId in UserRegistry)) {\n  msg.payload    = 'No Content'\n  msg.statusCode = 204\n  return [null,null,msg]\n}\n\nif (UserRegistry[UserId] == null) {\n  return [msg,null,null] // allow removal w/o authorization\n} else {\n  return [null,msg,null] // require authorization\n}\n\n",
         "outputs": 3,
         "noerr": 0,
         "initialize": "",
@@ -228,7 +220,7 @@
         "type": "function",
         "z": "80deaf3fb9cfc52d",
         "name": "delete user",
-        "func": "let Body = msg.req.body || {}\n  let UserId = Body.userid || ''\n\n  let Users = flow.get('Users') || {}\n    delete Users[UserId]\n  flow.set('Users',Users)\nmsg.cookies = { authentication: '' }\n\nmsg.payload    = 'No Content'\nmsg.statusCode = 204\nreturn [msg,null]\n",
+        "func": "let Body = msg.req.body || {}\n  let UserId = (Body.UserId || '').toLowerCase()\n\n  let UserRegistry = global.get('UserRegistry') || Object.create(null)\n    delete UserRegistry[UserId]\n  global.set('UserRegistry',UserRegistry)\nmsg.cookies = { authentication: '' }\n\nmsg.payload    = 'No Content'\nmsg.statusCode = 204\nreturn [msg,null]\n",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -344,8 +336,8 @@
         "name": "delete user",
         "props": [
             {
-                "p": "user-id",
-                "v": "",
+                "p": "UserId",
+                "v": "John.Doe@mail.de",
                 "vt": "str"
             }
         ],
@@ -383,8 +375,8 @@
         "id": "814f545ff963cecc",
         "type": "function",
         "z": "80deaf3fb9cfc52d",
-        "name": "update flow context",
-        "func": "let UserId = msg.UserId || ''\n  if (UserId.trim() === '') {\n    node.status({ fill:'red',shape:'dot',text:'missing user id'})\n    return null\n  }\n\n  if (/[:\\x00-\\x1f\\x7f]/.test(UserId)) {\n    node.status({ fill:'red',shape:'dot',text:'invalid user id'})\n    return null\n  }\n  \n  if (UserId.length > 2047) {\n    node.status({ fill:'red',shape:'dot',text:'user id too long'})\n    return null\n  }\n\n  node.status({})\nlet Users = flow.get('Users') || {}\n  delete Users[UserId]\nflow.set('Users',Users)\n\nreturn msg",
+        "name": "update global context",
+        "func": "let UserId = (msg.UserId || '').toLowerCase()\n  if (UserId.trim() === '') {\n    node.status({ fill:'red',shape:'dot',text:'missing user id'})\n    return null\n  }\n\n  if (/[:\\x00-\\x1f\\x7f]/.test(UserId)) {\n    node.status({ fill:'red',shape:'dot',text:'invalid user id'})\n    return null\n  }\n  \n  if (UserId.length > 2047) {\n    node.status({ fill:'red',shape:'dot',text:'user id too long'})\n    return null\n  }\n\n  node.status({})\nlet UserRegistry = global.get('UserRegistry') || Object.create(null)\n  delete UserRegistry[UserId]\nglobal.set('UserRegistry',UserRegistry)\n\nreturn msg",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -411,7 +403,7 @@
         "props": [
             {
                 "p": "UserId",
-                "v": "",
+                "v": "John.Doe@mail.de",
                 "vt": "str"
             }
         ],
@@ -433,8 +425,8 @@
         "id": "b03779e7769e2ad0",
         "type": "function",
         "z": "80deaf3fb9cfc52d",
-        "name": "update flow context",
-        "func": "let UserId = msg.UserId || ''\n  if (UserId.trim() === '') {\n    node.status({ fill:'red',shape:'dot',text:'missing user id'})\n    return null\n  }\n\n  if (/[:\\x00-\\x1f\\x7f]/.test(UserId)) {\n    node.status({ fill:'red',shape:'dot',text:'invalid user id'})\n    return null\n  }\n  \n  if (UserId.length > 2047) {\n    node.status({ fill:'red',shape:'dot',text:'user id too long'})\n    return null\n  }\n\n  node.status({})\nlet Users = flow.get('Users') || {}\n  Users[UserId] = ''\nflow.set('Users',Users)\n\nreturn msg",
+        "name": "update global context",
+        "func": "let UserId = (msg.UserId || '').toLowerCase()\n  if (UserId.trim() === '') {\n    node.status({ fill:'red',shape:'dot',text:'missing user id'})\n    return null\n  }\n\n  if (/[:\\x00-\\x1f\\x7f]/.test(UserId)) {\n    node.status({ fill:'red',shape:'dot',text:'invalid user id'})\n    return null\n  }\n  \n  if (UserId.length > 2047) {\n    node.status({ fill:'red',shape:'dot',text:'user id too long'})\n    return null\n  }\n\n  node.status({})\nlet UserRegistry = global.get('UserRegistry') || Object.create(null)\n  UserRegistry[UserId] = null // i.e., part of registry, but yet w/o settings\nglobal.set('UserRegistry',UserRegistry)\n\nreturn msg",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -476,8 +468,8 @@
         "id": "908896979f346b80",
         "type": "function",
         "z": "80deaf3fb9cfc52d",
-        "name": "build from flow context",
-        "func": "let Users = flow.get('Users') || {}\n  let UserList = []\n  for (let UserName in Users) {\n    if (Users.hasOwnProperty(UserName)) {\n      UserList.push(\n        Users[UserName] === '' ? '[' + UserName + ']' : UserName\n      )\n    }\n  }\nmsg.payload = (\n  UserList.length === 0\n  ? '(no user registered)'\n  : 'registered users: \"' + UserList.join('\",\"') + '\"'\n)\nreturn msg",
+        "name": "build from global context",
+        "func": "let UserRegistry = global.get('UserRegistry') || Object.create(null)\n  let UserList = []\n  for (let UserId in UserRegistry) {\n    UserList.push(\n      UserRegistry[UserId] == null ? '[' + UserId + ']' : UserId\n    )\n  }\nmsg.payload = (\n  UserList.length === 0\n  ? '(no user registered)'\n  : 'registered users: \"' + UserList.join('\",\"') + '\"'\n)\nreturn msg",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1199,6 +1191,9 @@
             [
                 "6edce1733b761832"
             ]
+        ],
+        "outputLabels": [
+            "return"
         ]
     },
     {
@@ -1588,7 +1583,7 @@
         "type": "function",
         "z": "80deaf3fb9cfc52d",
         "name": "read from global context",
-        "func": "  let UserRegistry = global.get('UserRegistry')\n\n  let UserSet = {}\n  for (let UserId in UserRegistry) {\n    let UserEntry = Object.assign({},UserRegistry[UserId])\n      delete UserEntry.Password          // never write passwords in plain text!\n    UserSet[UserId] = UserEntry\n  }\n\n  msg.payload = JSON.stringify(UserSet)\n  return msg\n",
+        "func": "  let UserRegistry = global.get('UserRegistry')\n  let UserSet = {}\n  for (let UserId in UserRegistry) {\n    if (UserRegistry[UserId] == null) {\n      UserSet[UserId] = null\n    } else {\n      let UserEntry = Object.assign({},UserRegistry[UserId])\n        delete UserEntry.Password     // never write passwords in plain text!\n      UserSet[UserId] = UserEntry\n    }\n  }\n\n  msg.payload = JSON.stringify(UserSet)\n  return msg\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1684,7 +1679,7 @@
         "type": "function",
         "z": "80deaf3fb9cfc52d",
         "name": "validate authorization",
-        "func": "  let Cookie = ((msg.req.cookies || {}).authorization || '').trim()\n  if (Cookie !== '') {\n    let UserRegistry = global.get('UserRegistry')\n\n    let [UserId,Expiration,Digest] = Cookie.split(':')\n    if (\n      (UserId !== '') && (UserId in UserRegistry) &&\n      /^\\d+$/.test(Expiration) && /^[0-9a-fA-F]+$/.test(Digest)\n    ) {\n      let TokenKey = global.get('TokenKey')\n        const HMAC = crypto.createHmac('sha256',TokenKey)\n        HMAC.update(UserId + ':' + Expiration)\n      let expectedDigest = HMAC.digest('hex')\n\n      if (\n        (Digest === expectedDigest) &&\n        (parseInt(Expiration,10) >= Date.now())\n      ) {\n        let UserRoles = UserRegistry[UserId].Roles || []\n        if (\n          (msg.requiredRole == null) ||\n          (UserRoles.indexOf(msg.requiredRole) >= 0)\n        ) {\n          msg.authenticatedUser = UserId\n          msg.authorizedRoles   = UserRegistry[UserId].Roles || []\n  \n          msg.cookies = msg.cookies || {}\n          msg.cookies.authorization = Cookie\n          return [msg,null]                                      // authorized\n        } else {\n          msg.cookies = msg.cookies || {}\n          msg.cookies.authorization = null\n        \n          msg.payload    = 'Unauthorized'\n          msg.statusCode = 401\n          return [null,msg]                                    // not authorized\n        }\n      }\n    }\n  }\n\n  msg.cookies = msg.cookies || {}\n  msg.cookies.authorization = null\n\n  msg.payload    = 'Unauthorized'\n  msg.statusCode = 401\n  return [null,msg]                                            // not authorized\n",
+        "func": "  let Cookie = ((msg.req.cookies || {}).authorization || '').trim()\n  if (Cookie !== '') {\n    let UserRegistry = global.get('UserRegistry') || Object.create(null)\n\n    let [UserId,Expiration,Digest] = Cookie.split(':')\n      UserId = UserId.toLowerCase()\n    if (\n      (UserId !== '') && (UserId in UserRegistry) && (UserRegistry[UserId] != null) &&\n      /^\\d+$/.test(Expiration) && /^[0-9a-fA-F]+$/.test(Digest)\n    ) {\n      let TokenKey = global.get('TokenKey')\n        const HMAC = crypto.createHmac('sha256',TokenKey)\n        HMAC.update(UserId + ':' + Expiration)\n      let expectedDigest = HMAC.digest('hex')\n\n      if (\n        (Digest === expectedDigest) &&\n        (parseInt(Expiration,10) >= Date.now())\n      ) {\n        let UserRoles = UserRegistry[UserId].Roles || []\n        if (\n          (msg.requiredRole == null) ||\n          (UserRoles.indexOf(msg.requiredRole) >= 0)\n        ) {\n          msg.authenticatedUser = UserId\n          msg.authorizedRoles   = UserRegistry[UserId].Roles || []\n\n          msg.cookies = msg.cookies || {}\n          msg.cookies.authorization = Cookie\n          return [msg,null]                                      // authorized\n        } else {\n          msg.cookies = msg.cookies || {}\n          msg.cookies.authorization = null\n\n          msg.payload    = 'Unauthorized'\n          msg.statusCode = 401\n          return [null,msg]                                    // not authorized\n        }\n      }\n    }\n  }\n\n  msg.cookies = msg.cookies || {}\n  msg.cookies.authorization = null\n\n  msg.payload    = 'Unauthorized'\n  msg.statusCode = 401\n  return [null,msg]                                            // not authorized\n",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -1711,7 +1706,7 @@
         "type": "function",
         "z": "80deaf3fb9cfc52d",
         "name": "validate credentials",
-        "func": "  let UserId   = (msg.payload.UserId  || '').toLowerCase()\n  let Password = msg.payload.Password || ''\n\n  let UserRegistry = global.get('UserRegistry') || Object.create(null)\n  if (UserId in UserRegistry) {\n    let UserSpecs = UserRegistry[UserId]\n    if (UserSpecs.Password === Password) {              // internal optimization\n      return withAuthorizationOf(UserId,UserSpecs.Roles || [])\n    }\n\n    let PBKDF2Iterations = global.get('PBKDF2Iterations') || 100000\n    crypto.pbkdf2(\n      Password, Buffer.from(UserSpecs.Salt,'hex'), PBKDF2Iterations, 64, 'sha512',\n      function (Error, computedHash) {\n        if ((Error == null) && (computedHash.toString('hex') === UserSpecs.Hash)) {\n          UserSpecs.Password = Password       // speeds up future auth. requests\n          return withAuthorizationOf(UserId,UserSpecs.Roles || [])\n        } else {\n          return withoutAuthorization()\n        }\n      }\n    )\n  } else {\n    return withoutAuthorization()\n  }\n\n  function withAuthorizationOf (UserName, UserRoles) {\n    if ((msg.requiredRole == null) || (UserRoles.indexOf(msg.requiredRole) >= 0)) {\n      msg.authenticatedUser = UserId\n      msg.authorizedRoles   = UserRoles\n\n      node.send([msg,null])\n      node.done()\n    } else {\n      return withoutAuthorization()\n    }\n  }\n\n  function withoutAuthorization () {\n    msg.cookies = msg.cookies || {}\n    msg.cookies.authorization = { value:null }\n\n    msg.payload    = 'Unauthorized'\n    msg.statusCode = 401\n\n    node.send([null,msg])\n    node.done()\n  }\n",
+        "func": "  let UserId   = (msg.payload.UserId  || '').toLowerCase()\n  let Password = msg.payload.Password || ''\n\n  let UserRegistry = global.get('UserRegistry') || Object.create(null)\n  if ((UserId in UserRegistry) && (UserRegistry[UserId] != null)) {\n    let UserSpecs = UserRegistry[UserId]\n\n    if (UserSpecs.Password === Password) {              // internal optimization\n      return withAuthorizationOf(UserId,UserSpecs.Roles || [])\n    }\n\n    let PBKDF2Iterations = global.get('PBKDF2Iterations') || 100000\n    crypto.pbkdf2(\n      Password, Buffer.from(UserSpecs.Salt,'hex'), PBKDF2Iterations, 64, 'sha512',\n      function (Error, computedHash) {console.log('>>>> Hash',computedHash.toString('hex'))\n        if ((Error == null) && (computedHash.toString('hex') === UserSpecs.Hash)) {\n          UserSpecs.Password = Password       // speeds up future auth. requests\n          return withAuthorizationOf(UserId,UserSpecs.Roles || [])\n        } else {\n          return withoutAuthorization()\n        }\n      }\n    )\n  } else {\n    return withoutAuthorization()\n  }\n\n  function withAuthorizationOf (UserName, UserRoles) {\n    if ((msg.requiredRole == null) || (UserRoles.indexOf(msg.requiredRole) >= 0)) {\n      msg.authenticatedUser = UserId\n      msg.authorizedRoles   = UserRoles\n\n      node.send([msg,null])\n      node.done()\n    } else {\n      return withoutAuthorization()\n    }\n  }\n\n  function withoutAuthorization () {\n    msg.cookies = msg.cookies || {}\n    msg.cookies.authorization = { value:null }\n\n    msg.payload    = 'Unauthorized'\n    msg.statusCode = 401\n\n    node.send([null,msg])\n    node.done()\n  }\n",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
