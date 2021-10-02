@@ -8,8 +8,6 @@ While it is generally not a good idea to use Node-RED for a web server that just
 
 For this series, it is assumed that the reader already installed Node-RED (as described in [Getting Started](https://nodered.org/docs/getting-started/)), optionally secured the editor (as shown in [Securing Node-RED](https://nodered.org/docs/user-guide/runtime/securing-node-red)) and started using it (as explained in [Creating your first flow](https://nodered.org/docs/tutorials/first-flow))
 
-> Nota bene: this work is currently in progress, do not expect it to be finished before midth of October 2021
-
 ### Required Extensions ###
 
 For these examples to be run, it is necessary to install the following extension:
