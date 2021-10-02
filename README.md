@@ -94,7 +94,7 @@ As mentioned before, the actual authentication and authorization originates from
 
 ![](examples/closed-web-server-III.png)
 
-If this flow is not used within the [Express server with an embedded Node-RED instance](https://github.com/rozek/node-red-within-express) - which is very likely as that server already serves static files itself - it will also be necessary to provide functions to read and write the user registry:
+If this flow is not used within the [Express server with an embedded Node-RED instance](https://github.com/rozek/node-red-within-express) (which is very likely as that server already serves static files itself) it will also be necessary to provide functions to read and write the user registry:
 
 ![](examples/closed-web-server-IV.png)
 
