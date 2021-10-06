@@ -26,7 +26,7 @@
   ".ics":"text/calendar",
   ".jar":"application/java-archive",
   ".jpeg":"image/jpeg",
-  ".js":"IETF)",
+  ".js":"application/javascript",
   ".json":"application/json",
   ".jsonld":"application/ld+json",
   ".mid":"audio/x-midi",
