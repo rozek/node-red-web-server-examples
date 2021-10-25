@@ -1,5 +1,15 @@
 [
     {
+        "id": "baeb1d0f58bd235b",
+        "type": "comment",
+        "z": "80deaf3fb9cfc52d",
+        "name": "closed Web Server",
+        "info": "",
+        "x": 110,
+        "y": 40,
+        "wires": []
+    },
+    {
         "id": "4ae46027c10e9ce3",
         "type": "comment",
         "z": "80deaf3fb9cfc52d",
@@ -1149,6 +1159,16 @@
         "wires": []
     },
     {
+        "id": "fd96db0c22c59125",
+        "type": "comment",
+        "z": "80deaf3fb9cfc52d",
+        "name": "Developer-managed Authorization Handling",
+        "info": "",
+        "x": 410,
+        "y": 40,
+        "wires": []
+    },
+    {
         "id": "e79264b784896a31",
         "type": "reusable",
         "z": "80deaf3fb9cfc52d",
@@ -1583,7 +1603,7 @@
         "type": "function",
         "z": "80deaf3fb9cfc52d",
         "name": "read from global context",
-        "func": "  let UserRegistry = global.get('UserRegistry')\n  let UserSet = {}\n  for (let UserId in UserRegistry) {\n    if (UserRegistry[UserId] == null) {\n      UserSet[UserId] = null\n    } else {\n      let UserEntry = Object.assign({},UserRegistry[UserId])\n        delete UserEntry.Password     // never write passwords in plain text!\n      UserSet[UserId] = UserEntry\n    }\n  }\n\n  msg.payload = JSON.stringify(UserSet)\n  return msg\n",
+        "func": "  let UserRegistry = global.get('UserRegistry') || Object.create(null)\n  let UserSet = {}\n  for (let UserId in UserRegistry) {\n    if (UserRegistry[UserId] == null) {\n      UserSet[UserId] = null\n    } else {\n      let UserEntry = Object.assign({},UserRegistry[UserId])\n        delete UserEntry.Password     // never write passwords in plain text!\n      UserSet[UserId] = UserEntry\n    }\n  }\n\n  msg.payload = JSON.stringify(UserSet)\n  return msg\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1593,7 +1613,8 @@
         "y": 460,
         "wires": [
             [
-                "1fa5c24ad0356c01"
+                "1fa5c24ad0356c01",
+                "c583e0ed8102b715"
             ]
         ]
     },
@@ -1706,7 +1727,7 @@
         "type": "function",
         "z": "80deaf3fb9cfc52d",
         "name": "validate credentials",
-        "func": "  let UserId   = (msg.payload.UserId  || '').toLowerCase()\n  let Password = msg.payload.Password || ''\n\n  let UserRegistry = global.get('UserRegistry') || Object.create(null)\n  if ((UserId in UserRegistry) && (UserRegistry[UserId] != null)) {\n    let UserSpecs = UserRegistry[UserId]\n\n    if (UserSpecs.Password === Password) {              // internal optimization\n      return withAuthorizationOf(UserId,UserSpecs.Roles || [])\n    }\n\n    let PBKDF2Iterations = global.get('PBKDF2Iterations') || 100000\n    crypto.pbkdf2(\n      Password, Buffer.from(UserSpecs.Salt,'hex'), PBKDF2Iterations, 64, 'sha512',\n      function (Error, computedHash) {console.log('>>>> Hash',computedHash.toString('hex'))\n        if ((Error == null) && (computedHash.toString('hex') === UserSpecs.Hash)) {\n          UserSpecs.Password = Password       // speeds up future auth. requests\n          return withAuthorizationOf(UserId,UserSpecs.Roles || [])\n        } else {\n          return withoutAuthorization()\n        }\n      }\n    )\n  } else {\n    return withoutAuthorization()\n  }\n\n  function withAuthorizationOf (UserName, UserRoles) {\n    if ((msg.requiredRole == null) || (UserRoles.indexOf(msg.requiredRole) >= 0)) {\n      msg.authenticatedUser = UserId\n      msg.authorizedRoles   = UserRoles\n\n      node.send([msg,null])\n      node.done()\n    } else {\n      return withoutAuthorization()\n    }\n  }\n\n  function withoutAuthorization () {\n    msg.cookies = msg.cookies || {}\n    msg.cookies.authorization = { value:null }\n\n    msg.payload    = 'Unauthorized'\n    msg.statusCode = 401\n\n    node.send([null,msg])\n    node.done()\n  }\n",
+        "func": "/**** expect credentials to be sent as part of a form or in JSON format ****/\n\n  let ContentType = msg.req.headers['content-type'] || ''\n  if (\n    ! ContentType.startsWith('application/x-www-form-urlencoded') &&\n    ! ContentType.startsWith('application/json')\n  ) {\n    msg.payload    = 'Bad Request (wrong content type)'\n    msg.statusCode = 400\n    return [null,msg]\n  }\n\n/**** validate credentials ****/\n\n  let UserId   = (msg.payload.UserId  || '').toLowerCase()\n  let Password = msg.payload.Password || ''\n\n  let UserRegistry = global.get('UserRegistry') || Object.create(null)\n  if ((UserId in UserRegistry) && (UserRegistry[UserId] != null)) {\n    let UserSpecs = UserRegistry[UserId]\n    if (UserSpecs.Password === Password) {              // internal optimization\n      return withAuthorizationOf(UserId,UserSpecs.Roles || [])\n    }\n\n    let PBKDF2Iterations = global.get('PBKDF2Iterations') || 100000\n    crypto.pbkdf2(\n      Password, Buffer.from(UserSpecs.Salt,'hex'), PBKDF2Iterations, 64, 'sha512',\n      function (Error, computedHash) {\n        if ((Error == null) && (computedHash.toString('hex') === UserSpecs.Hash)) {\n          UserSpecs.Password = Password       // speeds up future auth. requests\n          return withAuthorizationOf(UserId,UserSpecs.Roles || [])\n        } else {\n          return withoutAuthorization()\n        }\n      }\n    )\n  } else {\n    return withoutAuthorization()\n  }\n\n  function withAuthorizationOf (UserName, UserRoles) {\n    if ((msg.requiredRole == null) || (UserRoles.indexOf(msg.requiredRole) >= 0)) {\n      msg.authenticatedUser = UserId\n      msg.authorizedRoles   = UserRoles\n\n      node.send([msg,null])\n      node.done()\n    } else {\n      return withoutAuthorization()\n    }\n  }\n\n  function withoutAuthorization () {\n    msg.cookies = msg.cookies || {}\n    msg.cookies.authorization = { value:null }\n\n    msg.payload    = 'Unauthorized'\n    msg.statusCode = 401\n\n    node.send([null,msg])\n    node.done()\n  }\n",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -1992,6 +2013,22 @@
         "position": "2",
         "x": 1190,
         "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "c583e0ed8102b715",
+        "type": "debug",
+        "z": "80deaf3fb9cfc52d",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1260,
+        "y": 420,
         "wires": []
     }
 ]
