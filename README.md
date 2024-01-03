@@ -28,7 +28,7 @@ Alternatively, other tools like [cURL](https://curl.se/) may be used as well.
 
 The first example in this series is a simple web server delivering files found in a configured directory.
 
-> For this example to work, please copy file `FileTypeMappings.json` and folder `public` into the working directory of your Node-RED instance
+> **For this example to work, please copy file `FileTypeMappings.json` and folder `public` into the _working directory_ of your Node-RED instance**
 
 The server is principally "open" for everybody as not extra authorization is needed to get responses for sent requests.
 
@@ -58,7 +58,7 @@ As mentioned before, Node-RED becomes interesting as soon as servers with custom
 
 Because of the way in which these endpoints are recognized, more endpoints may easily be added (or unwanted ones removed). Static file serving is still included and starts if no custom endpoint was found - the flow needed is the same as in the previous example, which is why it has been connected using a "link" node: in this way, several implementations may use the same sequence of nodes without having to copy them.
 
-> For this example to work, please copy file `FileTypeMappings.json` and folder `public` into the working directory of your Node-RED instance
+> **For this example to work, please copy file `FileTypeMappings.json` and folder `public` into the _working directory_ of your Node-RED instance**
 
 ![](examples/custom-web-server.png)
 
@@ -82,7 +82,7 @@ User data is kept in a JSON file called `registeredUsers.json` within the workin
 
 User ids are mostly arbitrary - this server does not make any assumptions about their format (except that they must not contain neither colons (":") nor control characters and the upper and lower case is not distinguished). Their length should however be limited since cookies are not allowed to occupy more than 4093 characters (including their name and some other cookie details) - assuming a length limit of 2048 bytes seems like a good idea.
 
-> For this example to work, please copy file `FileTypeMappings.json` and folder `public` into the working directory of your Node-RED instance
+> **For this example to work, please copy file `FileTypeMappings.json` and folder `public` into the _working directory_ of your Node-RED instance**
 
 The main part of this server consists of HTTP entry points for file retrieval and user management, extended by some "offline" methods (for the flow developer) to create, list and delete users:
 
