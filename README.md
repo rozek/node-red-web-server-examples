@@ -44,7 +44,7 @@ Node-RED's debug console serves as a kind of "logger" and informs about any serv
 
 ![](examples/simple-web-server.png)
 
-Simply import the [example from this repo](examples/simple-web-server.json) into your Node-RED workspace and deploy. You may then test your server either by navigating your browser to `{{BaseURL}}/simple-web-server` or using the included Postman collection. Currently, the `public` folder contains two files only, but you are free to add as many files as you like.
+Simply import the [example from this repo](https://raw.githubusercontent.com/rozek/node-red-web-server-examples/main/examples/simple-web-server.json) into your Node-RED workspace and deploy. You may then test your server either by navigating your browser to `{{BaseURL}}/simple-web-server` or using the included Postman collection. Currently, the `public` folder contains two files only, but you are free to add as many files as you like.
 
 > Please note: usually, it is not a good idea to use Node-RED just for static file serving - there are lots of other solutions which are even simpler to install and configure and are much more performant and secure than this example. If, however, a server with custom endpoints is needed which *also* serves some static files, this example may be quite practical.
 
@@ -66,7 +66,7 @@ The following part is already known from the previous example:
 
 ![](examples/serving-files.png)
 
-To test this server, just import the ["custom web server" example](examples/custom-web-server.json) into your Node-RED workspace and deploy. It works similar to the "simple Web Server" presented before - with the exception, that requests to `{{BaseURL}}/custom-web-server/server-time`, `{{BaseURL}}/custom-web-server/echo` or `{{BaseURL}}/custom-web-server/client-address` will now be processed internally even if files with these names exist in the `public` directory. The included Postman collection may help you testing.
+To test this server, just import the ["custom web server" example](https://raw.githubusercontent.com/rozek/node-red-web-server-examples/main/examples/custom-web-server.json) into your Node-RED workspace and deploy. It works similar to the "simple Web Server" presented before - with the exception, that requests to `{{BaseURL}}/custom-web-server/server-time`, `{{BaseURL}}/custom-web-server/echo` or `{{BaseURL}}/custom-web-server/client-address` will now be processed internally even if files with these names exist in the `public` directory. The included Postman collection may help you testing.
 
 ### Closed Web Server ###
 
@@ -100,7 +100,7 @@ If this flow is not used within the [Express server with an embedded Node-RED in
 
 ![](examples/closed-web-server-IV.png)
 
-To test this server, just import the ["closed web server" example](examples/closed-web-server.json) into your Node-RED workspace and deploy. Any "administrative" operations have to be performed using Node-RED itself (just enter the names of the affected users into the `inject` nodes labelled "(re)set user" and "delete user"), the included Postman collection expects that you create a user called "John.Doe@mail.de" and this user then sets his password in order to get access to the served web pages.
+To test this server, just import the contents of file ["closed web server" example](https://raw.githubusercontent.com/rozek/node-red-web-server-examples/main/examples/closed-web-server.json) into your Node-RED workspace and deploy. Any "administrative" operations have to be performed using Node-RED itself (just enter the names of the affected users into the `inject` nodes labelled "(re)set user" and "delete user"), the included Postman collection expects that you create a user called "John.Doe@mail.de" and this user then sets his password in order to get access to the served web pages.
 
 In this example, *all* endpoints (except those needed for authorization management) demand a successful authorization before being processed. In practice, there is often a mixture of public and private endpoints - a situation which may easily be implemented by combining flows from this example and the previous one.
 
